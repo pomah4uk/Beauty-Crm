@@ -1,0 +1,435 @@
+// ===== ДАННЫЕ =====
+let data = JSON.parse(localStorage.getItem('data')) || {
+    clients: [],
+    records: [],
+    expenses: [],
+    services: [
+        {id:1, name:'Увеличение губ', price:0},
+        {id:2, name:'Увеличение губ 0.5', price:0},
+        {id:3, name:'Носогубки', price:0},
+        {id:4, name:'Биоревитализация', price:0},
+        {id:5, name:'Липолитики', price:0}
+    ],
+    inactiveDays: 30
+};
+let currentPage = 'dashboard';
+let editClientId = null;
+let editRecordId = null;
+let editServiceId = null;
+let statsClientId = null;
+
+// ===== УТИЛИТЫ =====
+function save() { localStorage.setItem('data', JSON.stringify(data)); render(); toast('✓'); }
+function toast(msg) { let t = document.createElement('div'); t.className = 'toast'; t.innerText = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2000); }
+function nextId(arr) { return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1; }
+function clientName(id) { let c = data.clients.find(x => x.id === id); return c ? c.name : 'Удалён'; }
+function clientPhone(id) { let c = data.clients.find(x => x.id === id); return c ? c.phone || '' : ''; }
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function daysSince(d) { if (!d) return 9999; return Math.floor((new Date() - new Date(d)) / 86400000); }
+function updateLastVisit(id) {
+    let last = data.records.filter(r => r.clientId === id && r.status === 'completed').sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    let c = data.clients.find(x => x.id === id);
+    if (c) { c.lastDate = last ? last.date : ''; c.lastService = last ? last.service : ''; }
+}
+function monthExp() {
+    let now = new Date(), m = now.getMonth(), y = now.getFullYear();
+    return data.expenses.filter(e => { let d = new Date(e.date); return d.getMonth() === m && d.getFullYear() === y; }).reduce((s, e) => s + e.amount, 0);
+}
+function show(id) { document.getElementById(id).style.display = 'flex'; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+// ===== НАВИГАЦИЯ =====
+function setPage(p) {
+    currentPage = p;
+    ['Dashboard', 'Clients', 'Records', 'History', 'Expenses', 'Services', 'Backup'].forEach(name => {
+        document.getElementById('page' + name).style.display = (p === name.toLowerCase()) ? 'block' : 'none';
+    });
+    document.getElementById('pageTitle').innerText = {
+        dashboard: 'Главная', clients: 'Клиенты', records: 'Активные записи',
+        history: 'История', expenses: 'Расходы', services: 'Услуги', backup: 'Бэкап'
+    }[p] || '';
+    render();
+}
+
+// ===== РЕНДЕР =====
+function render() {
+    if (currentPage === 'dashboard') renderDashboard();
+    else if (currentPage === 'clients') renderClients();
+    else if (currentPage === 'records') renderActive();
+    else if (currentPage === 'history') renderHistory();
+    else if (currentPage === 'expenses') renderExpenses();
+    else if (currentPage === 'services') renderServices();
+}
+
+function renderDashboard() {
+    let now = new Date(), m = now.getMonth(), y = now.getFullYear();
+    let mr = data.records.filter(r => r.status === 'completed' && r.date && new Date(r.date).getMonth() === m && new Date(r.date).getFullYear() === y);
+    let rev = mr.reduce((s, r) => s + (r.price || 0), 0);
+    let exp = monthExp();
+    let canc = data.records.filter(r => r.status === 'cancelled' && r.date && new Date(r.date).getMonth() === m && new Date(r.date).getFullYear() === y).length;
+    let act = data.records.filter(r => r.status === 'active').length;
+    let avg = mr.length ? Math.round(rev / mr.length) : 0;
+    let ss = {}; mr.forEach(r => { if (r.service) ss[r.service] = (ss[r.service] || 0) + 1; });
+    let top = Object.entries(ss).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
+
+    document.getElementById('statTotalClients').innerText = data.clients.length;
+    document.getElementById('statActive').innerText = act;
+    document.getElementById('statCompleted').innerText = mr.length;
+    document.getElementById('statCancelled').innerText = canc;
+    document.getElementById('statRevenue').innerText = rev + '₽';
+    document.getElementById('statCost').innerText = exp + '₽';
+    document.getElementById('statProfit').innerText = (rev - exp) + '₽';
+    document.getElementById('statAvgCheck').innerText = avg + '₽';
+    document.getElementById('statTopService').innerText = top.length > 15 ? top.slice(0, 15) + '…' : top;
+    document.getElementById('inactiveDaysLabel').innerText = data.inactiveDays;
+    renderInactive();
+}
+
+function renderInactive() {
+    let list = data.clients.filter(c => daysSince(c.lastDate) > data.inactiveDays && c.lastDate).sort((a, b) => daysSince(b.lastDate) - daysSince(a.lastDate));
+    let html = '';
+    if (list.length === 0) {
+        html = '<div style="text-align:center;color:#999;padding:12px">Все активны 👍</div>';
+    } else {
+        list.forEach(c => {
+            let d = daysSince(c.lastDate), cls = d > 60 ? 'days-danger' : 'days-warn';
+            html += `<div class="card pad12 mb8" style="cursor:default">
+                <div class="flex between mb8"><span class="card-name" style="cursor:pointer" onclick="showClientStats(${c.id})">${c.name}</span><span class="days-badge ${cls}">${d} дн</span></div>
+                <div class="flex end gap12">${c.phone ? `<button class="copy-btn" onclick="copyPhone('${c.phone}')">📋</button><button class="call-btn" onclick="callPhone('${c.phone}')">📞</button>` : '<span style="font-size:.7rem;color:#999">Нет телефона</span>'}</div></div>`;
+        });
+    }
+    document.getElementById('inactiveList').innerHTML = html;
+}
+
+function copyPhone(p) { navigator.clipboard.writeText(p).then(() => toast('📋 Скопировано')).catch(() => toast('Не удалось скопировать')); }
+function callPhone(p) { window.open('tel:' + p, '_self'); }
+
+function renderClients() {
+    let s = document.getElementById('clientSearch').value.toLowerCase();
+    let html = '';
+    data.clients.filter(c => c.name.toLowerCase().includes(s) || (c.phone && c.phone.includes(s))).forEach(c => {
+        let all = data.records.filter(r => r.clientId === c.id);
+        let done = all.filter(r => r.status === 'completed').length;
+        let canc = all.filter(r => r.status === 'cancelled').length;
+        let t = done + canc, p = t ? Math.round(done / t * 100) : 0;
+        html += `<div class="card" onclick="showClientStats(${c.id})">
+            <div class="card-header"><span class="card-name">${c.name}</span><span style="font-size:.7rem;color:#999">ID:${c.id}</span></div>
+            <div class="card-row"><span>📞</span><span>${c.phone||'—'}</span></div>
+            <div class="card-row"><span>🎂</span><span>${c.birth||'—'}</span></div>
+            <div class="card-row"><span>📅</span><span>${c.lastDate||'—'}</span></div>
+            <div class="card-row"><span>💉</span><span>${c.lastService||'—'}</span></div>
+            <div class="card-row"><span>⭐ Рейтинг</span><span>${p}% (${done}/${t})</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${p}%"></div></div></div>`;
+    });
+    document.getElementById('clientsList').innerHTML = html || '<div class="empty-state">Нет клиентов</div>';
+}
+
+function renderActive() {
+    let s = document.getElementById('recordsSearch').value.toLowerCase();
+    let html = '';
+    data.records.filter(r => r.status === 'active' && clientName(r.clientId).toLowerCase().includes(s)).forEach(r => {
+        let p = clientPhone(r.clientId);
+        html += `<div class="card">
+            <div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge badge-blue">📝</span></div>
+            <div class="card-row"><span>📅</span><span>${r.date||'—'}</span></div>
+            <div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div>
+            <div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div>
+            <div class="card-actions">${p?`<button class="call-btn" onclick="event.stopPropagation();callPhone('${p}')">📞</button>`:''}
+                <button class="small-btn" onclick="event.stopPropagation();completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button>
+                <button class="small-btn" onclick="event.stopPropagation();cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
+    });
+    document.getElementById('recordsList').innerHTML = html || '<div class="empty-state">Нет активных записей</div>';
+}
+
+function completeRecord(id) {
+    let r = data.records.find(x => x.id === id);
+    if (r && r.status === 'active') { r.status = 'completed'; updateLastVisit(r.clientId); save(); toast('✅ Выполнено'); }
+}
+function cancelRecord(id) {
+    if (confirm('Отменить?')) {
+        let r = data.records.find(x => x.id === id);
+        if (r) { r.status = 'cancelled'; updateLastVisit(r.clientId); save(); toast('❌ Отменено'); }
+    }
+}
+
+function renderHistory() {
+    let s = document.getElementById('historySearch').value.toLowerCase();
+    let f = document.querySelector('input[name="histFilter"]:checked')?.value || 'all';
+    let html = '';
+    data.records.filter(r => (r.status === 'completed' || r.status === 'cancelled') && clientName(r.clientId).toLowerCase().includes(s) && (f === 'all' || r.status === f)).forEach(r => {
+        let st = r.status === 'completed' ? '✅ Выполнена' : '❌ Отменена';
+        let sc = r.status === 'completed' ? 'badge-green' : 'badge-red';
+        html += `<div class="card">
+            <div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge ${sc}">${st}</span></div>
+            <div class="card-row"><span>📅</span><span>${r.date||'—'}</span></div>
+            <div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div>
+            <div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div>
+            <div class="card-actions"><button class="small-btn" onclick="event.stopPropagation();deleteRecord(${r.id})">🗑️</button></div></div>`;
+    });
+    document.getElementById('historyList').innerHTML = html || '<div class="empty-state">Нет записей</div>';
+}
+
+function deleteRecord(id) {
+    if (confirm('Удалить запись?')) { data.records = data.records.filter(r => r.id !== id); save(); }
+}
+
+function renderExpenses() {
+    let html = '';
+    [...data.expenses].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(e => {
+        html += `<div class="card">
+            <div class="card-row"><span>📅</span><span>${e.date||'—'}</span></div>
+            <div class="card-row"><span>💰</span><span>${e.amount}₽</span></div>
+            <div class="card-row"><span>📝</span><span>${e.comment||'—'}</span></div>
+            <div class="card-actions"><button class="small-btn" onclick="event.stopPropagation();deleteExpense(${e.id})">🗑️</button></div></div>`;
+    });
+    document.getElementById('expensesList').innerHTML = html || '<div class="empty-state">Нет расходов</div>';
+}
+
+function deleteExpense(id) {
+    if (confirm('Удалить расход?')) { data.expenses = data.expenses.filter(e => e.id !== id); save(); }
+}
+
+function renderServices() {
+    let html = '';
+    data.services.forEach(s => {
+        html += `<div class="card">
+            <div class="card-header"><span class="card-name">${s.name}</span><span style="font-size:.85rem;color:#666">${s.price?s.price+'₽':'без цены'}</span></div>
+            <div class="card-actions"><button class="small-btn" onclick="event.stopPropagation();editService(${s.id})">✏️</button>
+                <button class="small-btn" onclick="event.stopPropagation();deleteService(${s.id})">🗑️</button></div></div>`;
+    });
+    document.getElementById('servicesList').innerHTML = html || '<div class="empty-state">Нет услуг</div>';
+}
+
+function editService(id) {
+    let s = data.services.find(x => x.id === id);
+    if (s) {
+        document.getElementById('serviceName').value = s.name;
+        document.getElementById('servicePrice').value = s.price || '';
+        editServiceId = id;
+        document.getElementById('serviceModalTitle').innerText = '✏️ Услуга';
+        show('serviceModal');
+    }
+}
+function deleteService(id) {
+    if (confirm('Удалить услугу?')) { data.services = data.services.filter(s => s.id !== id); save(); }
+}
+
+// ===== МОДАЛКИ =====
+document.getElementById('addClientBtn').onclick = function() {
+    editClientId = null;
+    document.getElementById('clientName').value = '';
+    document.getElementById('clientPhone').value = '';
+    document.getElementById('clientBirth').value = '';
+    show('clientModal');
+};
+document.getElementById('addClientBtn2').onclick = function() { document.getElementById('addClientBtn').click(); };
+document.getElementById('saveClientBtn').onclick = function() {
+    let name = document.getElementById('clientName').value.trim();
+    if (!name) return alert('Введите имя');
+    let c = { id: editClientId || nextId(data.clients), name, phone: document.getElementById('clientPhone').value, birth: document.getElementById('clientBirth').value, lastDate: '', lastService: '' };
+    if (editClientId) { let i = data.clients.findIndex(x => x.id === editClientId); if (i !== -1) data.clients[i] = c; }
+    else data.clients.push(c);
+    save(); hide('clientModal');
+};
+document.getElementById('cancelClientBtn').onclick = function() { hide('clientModal'); };
+
+function openRecordModal(clientId) {
+    editRecordId = null;
+    let sel = document.getElementById('recordClient');
+    sel.innerHTML = '';
+    data.clients.forEach(c => {
+        let o = document.createElement('option'); o.value = c.id; o.textContent = c.name;
+        if (c.id === clientId) o.selected = true; sel.appendChild(o);
+    });
+    document.getElementById('recordDate').value = todayStr();
+    document.getElementById('recordDate').setAttribute('min', todayStr());
+    document.getElementById('servicesContainer').innerHTML = '';
+    addServiceRow('');
+    updateTotal();
+    updateCallLink();
+    show('recordModal');
+}
+
+document.getElementById('addRecordBtn').onclick = function() { openRecordModal(null); };
+document.getElementById('addRecordBtn2').onclick = function() { document.getElementById('addRecordBtn').click(); };
+
+document.getElementById('addServiceRowBtn').onclick = function() { addServiceRow(''); };
+
+function addServiceRow(name) {
+    let container = document.getElementById('servicesContainer');
+    let row = document.createElement('div'); row.className = 'service-row';
+    let sel = document.createElement('select'); sel.className = 'modal-select'; sel.style.marginBottom = '0';
+    data.services.forEach(s => {
+        let o = document.createElement('option'); o.value = s.name;
+        o.textContent = s.name + (s.price ? ` (${s.price}₽)` : '');
+        o.dataset.price = s.price || 0; if (s.name === name) o.selected = true;
+        sel.appendChild(o);
+    });
+    sel.onchange = updateTotal;
+    let btn = document.createElement('button'); btn.className = 'small-btn'; btn.style.flexShrink = '0';
+    btn.textContent = '✕'; btn.onclick = function() { row.remove(); updateTotal(); };
+    row.appendChild(sel); row.appendChild(btn); container.appendChild(row); updateTotal();
+}
+
+function updateTotal() {
+    let t = 0;
+    document.querySelectorAll('#servicesContainer select').forEach(s => {
+        let o = s.options[s.selectedIndex];
+        if (o && o.dataset.price) t += parseInt(o.dataset.price) || 0;
+    });
+    document.getElementById('recordPrice').value = t;
+    document.getElementById('recordTotalDisplay').innerText = t;
+}
+
+function updateCallLink() {
+    let p = clientPhone(parseInt(document.getElementById('recordClient').value));
+    let link = document.getElementById('callClientLink');
+    if (p) { link.href = 'tel:' + p; link.style.display = 'inline'; }
+    else { link.href = '#'; link.style.display = 'none'; }
+}
+
+document.getElementById('recordClient').onchange = updateCallLink;
+
+document.getElementById('saveRecordBtn').onclick = function() {
+    let cid = parseInt(document.getElementById('recordClient').value);
+    if (!cid) return alert('Выберите клиента');
+    if (document.getElementById('recordDate').value < todayStr()) return alert('Нельзя задним числом!');
+    let names = [];
+    document.querySelectorAll('#servicesContainer select').forEach(s => { if (s.value) names.push(s.value); });
+    if (!names.length) return alert('Выберите услугу');
+    let r = { id: editRecordId || nextId(data.records), clientId: cid, date: document.getElementById('recordDate').value, service: names.join(' + '), price: parseInt(document.getElementById('recordPrice').value) || 0, status: 'active' };
+    if (editRecordId) { let i = data.records.findIndex(x => x.id === editRecordId); if (i !== -1) data.records[i] = r; }
+    else data.records.push(r);
+    save(); hide('recordModal');
+};
+document.getElementById('cancelRecordBtn').onclick = function() { hide('recordModal'); };
+document.getElementById('quickAddClientBtn').onclick = function() {
+    hide('recordModal'); document.getElementById('addClientBtn').click();
+    let t = setInterval(function() { if (document.getElementById('clientModal').style.display === 'none') { clearInterval(t); document.getElementById('addRecordBtn').click(); } }, 200);
+};
+
+document.getElementById('addExpenseBtn').onclick = function() { document.getElementById('expenseAmount').value = ''; document.getElementById('expenseComment').value = ''; show('expenseModal'); };
+document.getElementById('addExpenseBtn2').onclick = function() { document.getElementById('addExpenseBtn').click(); };
+document.getElementById('saveExpenseBtn').onclick = function() {
+    let a = parseInt(document.getElementById('expenseAmount').value);
+    if (!a || a <= 0) return alert('Введите сумму');
+    data.expenses.push({ id: nextId(data.expenses), amount: a, comment: document.getElementById('expenseComment').value || 'Без комментария', date: todayStr() });
+    save(); hide('expenseModal');
+};
+document.getElementById('cancelExpenseBtn').onclick = function() { hide('expenseModal'); };
+
+document.getElementById('addServiceBtn').onclick = function() {
+    editServiceId = null; document.getElementById('serviceName').value = '';
+    document.getElementById('servicePrice').value = ''; document.getElementById('serviceModalTitle').innerText = '➕ Услуга'; show('serviceModal');
+};
+document.getElementById('saveServiceBtn').onclick = function() {
+    let n = document.getElementById('serviceName').value.trim();
+    if (!n) return alert('Введите название');
+    let s = { id: editServiceId || nextId(data.services), name: n, price: parseInt(document.getElementById('servicePrice').value) || 0 };
+    if (editServiceId) { let i = data.services.findIndex(x => x.id === editServiceId); if (i !== -1) data.services[i] = s; }
+    else data.services.push(s);
+    save(); hide('serviceModal');
+};
+document.getElementById('cancelServiceBtn').onclick = function() { hide('serviceModal'); };
+
+function showClientStats(id) {
+    let c = data.clients.find(x => x.id === id); if (!c) return; statsClientId = id;
+    let all = data.records.filter(r => r.clientId === id);
+    let done = all.filter(r => r.status === 'completed').length;
+    let canc = all.filter(r => r.status === 'cancelled').length;
+    let t = done + canc, p = t ? Math.round(done / t * 100) : 0;
+    let sum = all.filter(r => r.status === 'completed').reduce((s, r) => s + (r.price || 0), 0);
+    document.getElementById('clientStatsContent').innerHTML = `<div class="card">
+        <div class="card-row"><span>👤</span><span>${c.name}</span></div>
+        <div class="card-row"><span>📞</span><span>${c.phone||'—'}</span></div>
+        <div class="card-row"><span>🎂</span><span>${c.birth||'—'}</span></div>
+        <div class="card-row"><span>✅</span><span>${done}</span></div>
+        <div class="card-row"><span>❌</span><span>${canc}</span></div>
+        <div class="card-row"><span>📊</span><span>${t}</span></div>
+        <div class="card-row"><span>⭐</span><span>${p}%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${p}%"></div></div>
+        <div class="card-row"><span>💰</span><span>${sum}₽</span></div></div>`;
+    document.getElementById('clientStatsTitle').innerText = 'Статистика: ' + c.name;
+    show('clientStatsModal');
+}
+
+document.getElementById('closeStatsBtn').onclick = function() { hide('clientStatsModal'); };
+document.getElementById('createRecordForClientBtn').onclick = function() {
+    if (!statsClientId) return; hide('clientStatsModal'); openRecordModal(statsClientId);
+};
+document.getElementById('editClientFromStatsBtn').onclick = function() {
+    if (!statsClientId) return;
+    let c = data.clients.find(x => x.id === statsClientId);
+    if (c) { hide('clientStatsModal'); document.getElementById('clientName').value = c.name; document.getElementById('clientPhone').value = c.phone || ''; document.getElementById('clientBirth').value = c.birth || ''; editClientId = statsClientId; show('clientModal'); }
+};
+document.getElementById('deleteClientFromStatsBtn').onclick = function() {
+    if (!statsClientId) return;
+    if (confirm('Удалить клиента и все записи?')) { data.clients = data.clients.filter(x => x.id !== statsClientId); data.records = data.records.filter(r => r.clientId !== statsClientId); statsClientId = null; hide('clientStatsModal'); save(); }
+};
+
+document.getElementById('inactiveTitle').onclick = function(e) {
+    e.stopPropagation();
+    document.getElementById('inactiveDaysInput').value = data.inactiveDays;
+    show('inactiveDaysModal');
+};
+document.getElementById('saveInactiveDaysBtn').onclick = function() {
+    let v = parseInt(document.getElementById('inactiveDaysInput').value);
+    if (v && v >= 1) { data.inactiveDays = v; save(); } hide('inactiveDaysModal');
+};
+document.getElementById('cancelInactiveDaysBtn').onclick = function() { hide('inactiveDaysModal'); };
+
+document.getElementById('backupLink').onclick = function() { setPage('backup'); };
+document.getElementById('exportBtn').onclick = function() {
+    let a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    a.download = 'crm_' + Date.now() + '.json'; a.click(); toast('Бэкап сохранён');
+};
+document.getElementById('importBtn').onclick = function() { document.getElementById('importFile').click(); };
+document.getElementById('importFile').onchange = function(e) {
+    let f = e.target.files[0]; if (!f) return;
+    let r = new FileReader();
+    r.onload = function(ev) { try { data = JSON.parse(ev.target.result); save(); toast('Восстановлено'); } catch(e) { toast('Ошибка'); } };
+    r.readAsText(f); e.target.value = '';
+};
+document.getElementById('resetBtn').onclick = function() {
+    if (confirm('Удалить всё?')) { data = { clients: [], records: [], expenses: [], services: [{ id: 1, name: 'Консультация', price: 0 }], inactiveDays: 30 }; save(); toast('Удалено'); }
+};
+
+document.querySelectorAll('.dash-stat[data-nav]').forEach(function(el) {
+    el.onclick = function() {
+        let n = el.dataset.nav;
+        if (n === 'clients') setPage('clients');
+        else if (n === 'active') setPage('records');
+        else if (n === 'completed') { setPage('history'); setTimeout(function() { let rb = document.querySelector('input[name="histFilter"][value="completed"]'); if (rb) { rb.checked = true; render(); } }, 50); }
+        else if (n === 'cancelled') { setPage('history'); setTimeout(function() { let rb = document.querySelector('input[name="histFilter"][value="cancelled"]'); if (rb) { rb.checked = true; render(); } }, 50); }
+        else if (n === 'expenses') setPage('expenses');
+        else if (n === 'services') setPage('services');
+    };
+});
+
+document.querySelectorAll('.home-btn').forEach(function(b) { b.onclick = function() { setPage('dashboard'); }; });
+document.getElementById('clientSearch').oninput = function() { renderClients(); };
+document.getElementById('recordsSearch').oninput = function() { renderActive(); };
+document.getElementById('historySearch').oninput = function() { renderHistory(); };
+document.querySelectorAll('input[name="histFilter"]').forEach(function(r) { r.onchange = function() { renderHistory(); }; });
+
+// ===== ТЕМА =====
+let dark = localStorage.getItem('dark') === 'true';
+if (dark) document.body.classList.add('dark');
+document.getElementById('themeBtn').innerText = dark ? '☀️' : '🌙';
+document.getElementById('themeBtn').onclick = function() {
+    dark = !dark; document.body.classList.toggle('dark', dark);
+    document.getElementById('themeBtn').innerText = dark ? '☀️' : '🌙'; localStorage.setItem('dark', dark);
+};
+
+// ===== СТАРТ =====
+setPage('dashboard');
+window.onscroll = function() { let b = document.querySelector('.scroll-top'); if (b) b.style.display = window.scrollY > 300 ? 'flex' : 'none'; };
+let sb = document.createElement('div'); sb.className = 'scroll-top'; sb.innerHTML = '⬆';
+sb.onclick = function() { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+document.body.appendChild(sb);
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(function() { console.log('SW ok'); }).catch(function() {});
+}
