@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
@@ -16,12 +15,22 @@
 <div class="header"><h1 id="pageTitle">Главная</h1><button class="theme-switch" id="themeBtn">🌙</button></div>
 
 <!-- ГЛАВНАЯ -->
-
 <div id="pageDashboard">
     <div class="flex gap12 mb12">
         <button id="addRecordBtn" class="btn btn-success">📝 Запись клиента</button>
         <button id="addExpenseBtn" class="btn btn-orange">➕ Расход</button>
     </div>
+
+    <!-- КАЛЕНДАРЬ -->
+    <div class="report-block mb12" id="todayBlock">
+        <h3 class="mb12">📅 Сегодня (<span id="todayDate"></span>)</h3>
+        <div id="todayList"></div>
+    </div>
+    <div class="report-block mb12" id="tomorrowBlock">
+        <h3 class="mb12">📅 Завтра (<span id="tomorrowDate"></span>)</h3>
+        <div id="tomorrowList"></div>
+    </div>
+
     <div class="dash-stats">
         <div class="dash-stat" data-nav="clients"><div class="dash-stat-label">👥 Всего клиентов</div><div class="dash-stat-value" id="statTotalClients">0</div></div>
         <div class="dash-stat"><div class="dash-stat-label">💰 Средний чек</div><div class="dash-stat-value" id="statAvgCheck">0₽</div></div>
@@ -224,6 +233,34 @@ function renderDashboard(){
     let act=data.records.filter(r=>r.status==='active').length,avg=mr.length?Math.round(rev/mr.length):0;
     let ss={};mr.forEach(r=>{if(r.service)ss[r.service]=(ss[r.service]||0)+1;});
     let top=Object.entries(ss).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+
+    // Календарь
+    let today = todayStr();
+    let tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+    let tomorrowStr = tomorrow.toISOString().slice(0,10);
+    document.getElementById('todayDate').innerText = today;
+    document.getElementById('tomorrowDate').innerText = tomorrowStr;
+    let todayRecords = data.records.filter(r => r.status === 'active' && r.date === today);
+    let tomorrowRecords = data.records.filter(r => r.status === 'active' && r.date === tomorrowStr);
+    function renderCal(list, elId) {
+        let h = '';
+        if (!list.length) {
+            h = '<div style="text-align:center;color:#999;padding:8px">Нет записей</div>';
+        } else {
+            list.forEach(r => {
+                let p = clientPhone(r.clientId);
+                h += `<div class="card pad12 mb8" style="cursor:default">
+                    <div class="flex between mb8"><span class="card-name">${clientName(r.clientId)}</span><span style="font-size:.85rem;color:#666">${r.service||'—'}</span></div>
+                    <div class="flex end gap12">${p?`<button class="call-btn" onclick="callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
+            });
+        }
+        document.getElementById(elId).innerHTML = h;
+    }
+    renderCal(todayRecords, 'todayList');
+    renderCal(tomorrowRecords, 'tomorrowList');
+    document.getElementById('todayBlock').style.display = todayRecords.length ? 'block' : 'none';
+    document.getElementById('tomorrowBlock').style.display = tomorrowRecords.length ? 'block' : 'none';
+
     document.getElementById('statTotalClients').innerText=data.clients.length;
     document.getElementById('statActive').innerText=act;
     document.getElementById('statCompleted').innerText=mr.length;
@@ -234,6 +271,7 @@ function renderDashboard(){
     document.getElementById('statAvgCheck').innerText=avg+'₽';
     document.getElementById('statTopService').innerText=top.length>15?top.slice(0,15)+'…':top;
     document.getElementById('inactiveDaysLabel').innerText=data.inactiveDays;
+
     let list=data.clients.filter(c=>daysSince(c.lastDate)>data.inactiveDays&&c.lastDate).sort((a,b)=>daysSince(b.lastDate)-daysSince(a.lastDate));
     let h='';
     if(!list.length)h='<div style="text-align:center;color:#999;padding:12px">Все активны 👍</div>';
@@ -241,6 +279,7 @@ function renderDashboard(){
         h+=`<div class="card pad12 mb8" style="cursor:default"><div class="flex between mb8"><span class="card-name" style="cursor:pointer" onclick="showClientStats(${c.id})">${c.name}</span><span class="days-badge ${cls}">${d} дн</span></div><div class="flex end gap12">${c.phone?`<button class="copy-btn" onclick="copyPhone('${c.phone}')">📋</button><button class="call-btn" onclick="callPhone('${c.phone}')">📞</button>`:'<span style="font-size:.7rem;color:#999">Нет телефона</span>'}</div></div>`;});
     document.getElementById('inactiveList').innerHTML=h;
 }
+
 function copyPhone(p){navigator.clipboard.writeText(p).then(()=>toast('📋 Скопировано'));}
 function callPhone(p){window.open('tel:'+p,'_self');}
 
