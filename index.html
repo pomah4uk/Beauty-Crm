@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CRM Мастер">
+<meta name="theme-color" content="#f1f2f6">
 <title>CRM Мастер</title>
 <style>
 :root{--bg:#f1f2f6;--card:#fff;--text:#1e272e;--sub:#555;--br:14px;--pad:12px}
@@ -49,7 +52,7 @@ body.dark .small-btn{background:#3b4a54;color:#fff}
 .dash-stat-label{font-size:.7rem;color:#7f8c8d}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1100}
 .modal-content{background:var(--card);width:90%;max-width:400px;border-radius:28px;padding:24px;max-height:90vh;overflow-y:auto}
-.modal-input,.modal-select{width:100%;padding:var(--pad);margin-bottom:12px;border-radius:var(--br);border:1px solid #ccc;background:var(--card);color:var(--text)}
+.modal-input,.modal-select{width:100%;padding:var(--pad);margin-bottom:12px;border-radius:var(--br);border:1px solid #ccc;background:var(--card);color:var(--text);font-size:1rem}
 .modal-label{font-size:.85rem;font-weight:600;margin-bottom:4px;display:block;color:var(--sub)}
 .modal-buttons{display:flex;gap:12px;margin-top:20px}
 .modal-buttons button{flex:1;padding:var(--pad);border-radius:var(--br);border:none;font-weight:600;cursor:pointer}
@@ -73,6 +76,10 @@ body.dark .home-btn{background:#3b4a54;color:#fff}
 .days-warn{background:#f39c1220;color:#e67e22}
 .days-danger{background:#e74c3c20;color:#c0392b}
 .link-btn{background:none;border:none;color:#3498db;cursor:pointer;font-size:.8rem}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.header h1{flex:1}
+.theme-switch{background:none;border:none;font-size:1.4rem;cursor:pointer;flex-shrink:0;margin-left:12px}
+.total-display{background:var(--card);font-size:1.2rem;font-weight:800;padding:var(--pad);border-radius:var(--br);text-align:center;margin-bottom:12px;border:2px solid #27ae60;color:#27ae60}
 </style>
 </head>
 <body>
@@ -122,7 +129,8 @@ body.dark .home-btn{background:#3b4a54;color:#fff}
 <label class="modal-label">Дата</label><input type="date" class="modal-input" id="recordDate"><div class="modal-hint">Только сегодня или будущая дата</div>
 <label class="modal-label">Услуги</label><div id="servicesContainer"></div>
 <button id="addServiceRowBtn" class="small-btn mb12">+ Добавить услугу</button>
-<label class="modal-label">Общая сумма</label><input class="modal-input" id="recordPrice" placeholder="Сумма" readonly style="background:#f8f9fa;font-weight:bold">
+<div class="total-display">Общая сумма: <span id="recordTotalDisplay">0</span>₽</div>
+<input type="hidden" id="recordPrice" value="0">
 <div class="modal-buttons"><button id="cancelRecordBtn">Отмена</button><button id="saveRecordBtn">Сохранить</button></div></div></div>
 
 <div id="expenseModal" class="modal"><div class="modal-content"><h3>➕ Расход</h3>
@@ -249,7 +257,7 @@ function renderInactive() {
     document.getElementById('inactiveList').innerHTML = html;
 }
 
-function copyPhone(p) { navigator.clipboard.writeText(p).then(() => toast('📋 Скопировано')); }
+function copyPhone(p) { navigator.clipboard.writeText(p).then(() => toast('📋 Скопировано')).catch(() => toast('Не удалось скопировать')); }
 function callPhone(p) { window.open('tel:' + p, '_self'); }
 
 function renderClients() {
@@ -393,7 +401,7 @@ function openRecordModal(clientId) {
     document.getElementById('recordDate').setAttribute('min', todayStr());
     document.getElementById('servicesContainer').innerHTML = '';
     addServiceRow('');
-    document.getElementById('recordPrice').value = '0';
+    updateTotal();
     updateCallLink();
     show('recordModal');
 }
@@ -406,7 +414,7 @@ document.getElementById('addServiceRowBtn').onclick = function() { addServiceRow
 function addServiceRow(name) {
     let container = document.getElementById('servicesContainer');
     let row = document.createElement('div'); row.className = 'service-row';
-    let sel = document.createElement('select'); sel.className = 'modal-input'; sel.style.marginBottom = '0';
+    let sel = document.createElement('select'); sel.className = 'modal-select'; sel.style.marginBottom = '0';
     data.services.forEach(s => {
         let o = document.createElement('option'); o.value = s.name;
         o.textContent = s.name + (s.price ? ` (${s.price}₽)` : '');
@@ -422,9 +430,11 @@ function addServiceRow(name) {
 function updateTotal() {
     let t = 0;
     document.querySelectorAll('#servicesContainer select').forEach(s => {
-        let o = s.options[s.selectedIndex]; if (o) t += parseInt(o.dataset.price) || 0;
+        let o = s.options[s.selectedIndex];
+        if (o && o.dataset.price) t += parseInt(o.dataset.price) || 0;
     });
     document.getElementById('recordPrice').value = t;
+    document.getElementById('recordTotalDisplay').innerText = t;
 }
 
 function updateCallLink() {
@@ -574,6 +584,11 @@ window.onscroll = function() { let b = document.querySelector('.scroll-top'); if
 let sb = document.createElement('div'); sb.className = 'scroll-top'; sb.innerHTML = '⬆';
 sb.onclick = function() { window.scrollTo({ top: 0, behavior: 'smooth' }); };
 document.body.appendChild(sb);
+
+// ===== SERVICE WORKER (для PWA) =====
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(function() { console.log('SW ok'); }).catch(function() {});
+}
 </script>
 </body>
 </html>
