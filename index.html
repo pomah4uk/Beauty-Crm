@@ -275,8 +275,13 @@ function renderDashboard(){
     let list=data.clients.filter(c=>daysSince(c.lastDate)>data.inactiveDays&&c.lastDate).sort((a,b)=>daysSince(b.lastDate)-daysSince(a.lastDate));
     let h='';
     if(!list.length)h='<div style="text-align:center;color:#999;padding:12px">Все активны 👍</div>';
-    else list.forEach(c=>{let d=daysSince(c.lastDate),cls=d>60?'days-danger':'days-warn';
-        h+=`<div class="card pad12 mb8" style="cursor:default"><div class="flex between mb8"><span class="card-name" style="cursor:pointer" onclick="showClientStats(${c.id})">${c.name}</span><span class="days-badge ${cls}">${d} дн</span></div><div class="flex end gap12">${c.phone?`<button class="copy-btn" onclick="copyPhone('${c.phone}')">📋</button><button class="call-btn" onclick="callPhone('${c.phone}')">📞</button>`:'<span style="font-size:.7rem;color:#999">Нет телефона</span>'}</div></div>`;});
+    else list.forEach(c=>{
+        let d=daysSince(c.lastDate),cls=d>60?'days-danger':'days-warn';
+        let cid=c.id,cphone=c.phone||'';
+        h+=`<div class="card pad12 mb8" style="cursor:pointer" onclick="showClientStats(${cid})">
+            <div class="flex between mb8" style="pointer-events:none"><span class="card-name">${c.name}</span><span class="days-badge ${cls}">${d} дн</span></div>
+            <div class="flex end gap12">${cphone?`<button class="copy-btn" onclick="event.stopPropagation();copyPhone('${cphone}')">📋</button><button class="call-btn" onclick="event.stopPropagation();callPhone('${cphone}')">📞</button>`:'<span style="font-size:.7rem;color:#999">Нет телефона</span>'}</div></div>`;
+    });
     document.getElementById('inactiveList').innerHTML=h;
 }
 
@@ -444,6 +449,15 @@ document.querySelectorAll('input[name="histFilter"]').forEach(r=>r.onchange=rend
 
 document.getElementById('addRecordBtn').onclick=function(){openRecordModal(null);};
 document.getElementById('addRecordBtn2').onclick=function(){openRecordModal(null);};
+
+// ===== ЗАКРЫТИЕ МОДАЛОК ПО КЛИКУ ВНЕ ПОЛЯ =====
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    });
+});
 
 // Тема
 let dark=localStorage.getItem('dark')==='true';if(dark)document.body.classList.add('dark');
