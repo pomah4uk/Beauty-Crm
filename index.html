@@ -131,6 +131,7 @@
             <span style="font-size:.85rem">📞</span><a id="callClientLink" href="#" style="color:#27ae60;text-decoration:none;font-size:.8rem">Позвонить клиенту</a>
         </div>
         <label class="modal-label">Дата</label><input type="date" class="modal-input" id="recordDate">
+        <label class="modal-label">Время</label><input type="time" class="modal-input" id="recordTime" value="12:00">
         <div class="modal-hint">Только сегодня или будущая дата</div>
         <label class="modal-label">Услуги</label><div id="servicesContainer"></div>
         <button id="addServiceRowBtn" class="small-btn mb12">+ Добавить услугу</button>
@@ -250,7 +251,7 @@ function renderDashboard(){
             list.forEach(r => {
                 let p = clientPhone(r.clientId);
                 h += `<div class="card pad12 mb8" style="cursor:default">
-                    <div class="flex between mb8"><span class="card-name">${clientName(r.clientId)}</span><span style="font-size:.85rem;color:#666">${r.service||'—'}</span></div>
+                    <div class="flex between mb8"><span class="card-name">${clientName(r.clientId)}</span><span style="font-size:.85rem;color:#666">${r.time||'12:00'} — ${r.service||'—'}</span></div>
                     <div class="flex end gap12">${p?`<button class="call-btn" onclick="callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
             });
         }
@@ -304,7 +305,7 @@ function renderActive(){
     let h='';
     data.records.filter(r=>r.status==='active'&&clientName(r.clientId).toLowerCase().includes(s)).forEach(r=>{
         let p=clientPhone(r.clientId);
-        h+=`<div class="card"><div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge badge-blue">📝</span></div><div class="card-row"><span>📅</span><span>${r.date||'—'}</span></div><div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div><div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div><div class="card-actions">${p?`<button class="call-btn" onclick="event.stopPropagation();callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="event.stopPropagation();completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="event.stopPropagation();cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
+        h+=`<div class="card"><div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge badge-blue">📝</span></div><div class="card-row"><span>📅</span><span>${r.date||'—'} ${r.time||'12:00'}</span></div><div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div><div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div><div class="card-actions">${p?`<button class="call-btn" onclick="event.stopPropagation();callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="event.stopPropagation();completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="event.stopPropagation();cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
     });
     document.getElementById('recordsList').innerHTML=h||'<div style="text-align:center;color:#999;padding:20px">Нет активных записей</div>';
 }
@@ -316,7 +317,7 @@ function renderHistory(){
     let h='';
     data.records.filter(r=>(r.status==='completed'||r.status==='cancelled')&&clientName(r.clientId).toLowerCase().includes(s)&&(f==='all'||r.status===f)).forEach(r=>{
         let st=r.status==='completed'?'✅ Выполнена':'❌ Отменена',sc=r.status==='completed'?'badge-green':'badge-red';
-        h+=`<div class="card"><div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge ${sc}">${st}</span></div><div class="card-row"><span>📅</span><span>${r.date||'—'}</span></div><div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div><div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div><div class="card-actions"><button class="small-btn" onclick="event.stopPropagation();deleteRecord(${r.id})">🗑️</button></div></div>`;
+        h+=`<div class="card"><div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge ${sc}">${st}</span></div><div class="card-row"><span>📅</span><span>${r.date||'—'} ${r.time||'12:00'}</span></div><div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div><div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div><div class="card-actions"><button class="small-btn" onclick="event.stopPropagation();deleteRecord(${r.id})">🗑️</button></div></div>`;
     });
     document.getElementById('historyList').innerHTML=h||'<div style="text-align:center;color:#999;padding:20px">Нет записей</div>';
 }
@@ -363,6 +364,7 @@ function openRecordModal(clientId){
     document.getElementById('callLinkRow').style.display=clientId?'flex':'none';
     document.getElementById('newClientName').value='';document.getElementById('newClientPhone').value='';
     document.getElementById('recordDate').value=todayStr();document.getElementById('recordDate').setAttribute('min',todayStr());
+    document.getElementById('recordTime').value='12:00';
     document.getElementById('servicesContainer').innerHTML='';addServiceRow('');updateTotal();
     if(clientId)updateCallLink();
     show('recordModal');
@@ -392,7 +394,8 @@ document.getElementById('saveRecordBtn').onclick=function(){
     if(document.getElementById('recordDate').value<todayStr())return alert('Нельзя задним числом!');
     let names=[];document.querySelectorAll('#servicesContainer select').forEach(s=>{if(s.value)names.push(s.value);});
     if(!names.length)return alert('Выберите услугу');
-    let r={id:nextId(data.records),clientId:cid,date:document.getElementById('recordDate').value,service:names.join(' + '),price:parseInt(document.getElementById('recordPrice').value)||0,status:'active'};
+    let timeVal=document.getElementById('recordTime').value||'12:00';
+    let r={id:nextId(data.records),clientId:cid,date:document.getElementById('recordDate').value,time:timeVal,service:names.join(' + '),price:parseInt(document.getElementById('recordPrice').value)||0,status:'active'};
     data.records.push(r);save();hide('recordModal');
 };
 document.getElementById('cancelRecordBtn').onclick=function(){hide('recordModal');};
