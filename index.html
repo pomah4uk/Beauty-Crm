@@ -1,86 +1,421 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="CRM Мастер">
-<meta name="theme-color" content="#f1f2f6">
-<link rel="stylesheet" href="style.css">
-<title>CRM Мастер</title>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="CRM Мастер">
+    <meta name="theme-color" content="#f1f2f6">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>CRM Мастер</title>
 </head>
 <body>
+
 <div class="header"><h1 id="pageTitle">Главная</h1><button class="theme-switch" id="themeBtn">🌙</button></div>
 
+<!-- ГЛАВНАЯ -->
+
 <div id="pageDashboard">
-<div class="flex gap12 mb12"><button id="addClientBtn" class="btn btn-primary">+ Клиент</button><button id="addRecordBtn" class="btn btn-success">+ Запись</button><button id="addExpenseBtn" class="btn btn-orange">➕ Расход</button></div>
-<div class="dash-stats">
-<div class="dash-stat" data-nav="clients"><div class="dash-stat-label">👥 Всего клиентов</div><div class="dash-stat-value" id="statTotalClients">0</div></div>
-<div class="dash-stat"><div class="dash-stat-label">💰 Средний чек</div><div class="dash-stat-value" id="statAvgCheck">0₽</div></div>
-<div class="dash-stat" data-nav="services"><div class="dash-stat-label">⭐ Топ услуга</div><div class="dash-stat-value" id="statTopService" style="font-size:1rem">—</div></div>
+    <div class="flex gap12 mb12">
+        <button id="addRecordBtn" class="btn btn-success">📝 Запись клиента</button>
+        <button id="addExpenseBtn" class="btn btn-orange">➕ Расход</button>
+    </div>
+    <div class="dash-stats">
+        <div class="dash-stat" data-nav="clients"><div class="dash-stat-label">👥 Всего клиентов</div><div class="dash-stat-value" id="statTotalClients">0</div></div>
+        <div class="dash-stat"><div class="dash-stat-label">💰 Средний чек</div><div class="dash-stat-value" id="statAvgCheck">0₽</div></div>
+        <div class="dash-stat" data-nav="services"><div class="dash-stat-label">⭐ Топ услуга</div><div class="dash-stat-value" id="statTopService" style="font-size:1rem">—</div></div>
+    </div>
+    <div class="dash-stats">
+        <div class="dash-stat" data-nav="active"><div class="dash-stat-label">📝 Активных</div><div class="dash-stat-value" id="statActive">0</div></div>
+        <div class="dash-stat" data-nav="completed"><div class="dash-stat-label">✅ Выполнено (мес)</div><div class="dash-stat-value" id="statCompleted">0</div></div>
+        <div class="dash-stat" data-nav="cancelled"><div class="dash-stat-label">❌ Отменено (мес)</div><div class="dash-stat-value" id="statCancelled">0</div></div>
+    </div>
+    <div class="dash-stats">
+        <div class="dash-stat"><div class="dash-stat-label">💰 Выручка (мес)</div><div class="dash-stat-value" id="statRevenue">0₽</div></div>
+        <div class="dash-stat" data-nav="expenses"><div class="dash-stat-label">💸 Затраты (мес)</div><div class="dash-stat-value" id="statCost">0₽</div></div>
+        <div class="dash-stat"><div class="dash-stat-label">📈 Чистая прибыль</div><div class="dash-stat-value" id="statProfit">0₽</div></div>
+    </div>
+    <div class="report-block">
+        <h3 class="mb12" id="inactiveTitle" style="cursor:pointer">⏰ Давно не заходили (>&nbsp;<span id="inactiveDaysLabel">30</span>&nbsp;дней) ⚙️</h3>
+        <div id="inactiveList"></div>
+    </div>
+    <div class="bottom-link"><a id="backupLink">💾 Бэкап</a></div>
 </div>
-<div class="dash-stats">
-<div class="dash-stat" data-nav="active"><div class="dash-stat-label">📝 Активных</div><div class="dash-stat-value" id="statActive">0</div></div>
-<div class="dash-stat" data-nav="completed"><div class="dash-stat-label">✅ Выполнено (мес)</div><div class="dash-stat-value" id="statCompleted">0</div></div>
-<div class="dash-stat" data-nav="cancelled"><div class="dash-stat-label">❌ Отменено (мес)</div><div class="dash-stat-value" id="statCancelled">0</div></div>
-</div>
-<div class="dash-stats">
-<div class="dash-stat"><div class="dash-stat-label">💰 Выручка (мес)</div><div class="dash-stat-value" id="statRevenue">0₽</div></div>
-<div class="dash-stat" data-nav="expenses"><div class="dash-stat-label">💸 Затраты (мес)</div><div class="dash-stat-value" id="statCost">0₽</div></div>
-<div class="dash-stat"><div class="dash-stat-label">📈 Чистая прибыль</div><div class="dash-stat-value" id="statProfit">0₽</div></div>
-</div>
-<div class="report-block"><h3 class="mb12" id="inactiveTitle" style="cursor:pointer">⏰ Давно не заходили (>&nbsp;<span id="inactiveDaysLabel">30</span>&nbsp;дней) ⚙️</h3><div id="inactiveList"></div></div>
-<div class="bottom-link"><a id="backupLink">💾 Бэкап</a></div>
+
+<!-- КЛИЕНТЫ -->
+<div id="pageClients" class="hidden">
+    <button class="home-btn">🏠 Домой</button>
+    <input class="search-box" id="clientSearch" placeholder="🔍 Поиск">
+    <button id="addClientBtn2" class="btn btn-primary">+ Клиент</button>
+    <div id="clientsList"></div>
 </div>
 
-<div id="pageClients" class="hidden"><button class="home-btn">🏠 Главная</button><input class="search-box" id="clientSearch" placeholder="🔍 Поиск"><button id="addClientBtn2" class="btn btn-primary">+ Клиент</button><div id="clientsList"></div></div>
-<div id="pageRecords" class="hidden"><button class="home-btn">🏠 Главная</button><input class="search-box" id="recordsSearch" placeholder="🔍 Поиск"><button id="addRecordBtn2" class="btn btn-primary">+ Запись</button><div id="recordsList"></div></div>
-<div id="pageHistory" class="hidden"><button class="home-btn">🏠 Главная</button><input class="search-box" id="historySearch" placeholder="🔍 Поиск"><div class="filter-radio-group"><label><input type="radio" name="histFilter" value="all" checked> Все</label><label><input type="radio" name="histFilter" value="completed"> Выполненные</label><label><input type="radio" name="histFilter" value="cancelled"> Отменённые</label></div><div id="historyList"></div></div>
-<div id="pageExpenses" class="hidden"><button class="home-btn">🏠 Главная</button><button id="addExpenseBtn2" class="btn btn-orange mb12">➕ Добавить расход</button><div id="expensesList"></div></div>
-<div id="pageServices" class="hidden"><button class="home-btn">🏠 Главная</button><button id="addServiceBtn" class="btn btn-primary">+ Добавить услугу</button><div id="servicesList"></div></div>
-<div id="pageBackup" class="hidden"><button class="home-btn">🏠 Главная</button>
-<div class="backup-panel"><h3>📤 Экспорт</h3><button id="exportBtn" class="btn btn-primary">Сохранить бэкап</button></div>
-<div class="backup-panel"><h3>📥 Импорт</h3><input type="file" id="importFile" class="hidden"><button id="importBtn" class="btn btn-primary">Восстановить из файла</button></div>
-<div class="backup-panel"><h3>🗑️ Сброс</h3><button id="resetBtn" class="btn btn-danger">Удалить всё</button></div></div>
+<!-- АКТИВНЫЕ ЗАПИСИ -->
+<div id="pageRecords" class="hidden">
+    <button class="home-btn">🏠 Домой</button>
+    <input class="search-box" id="recordsSearch" placeholder="🔍 Поиск">
+    <button id="addRecordBtn2" class="btn btn-success">📝 Запись клиента</button>
+    <div id="recordsList"></div>
+</div>
 
-<div id="clientModal" class="modal"><div class="modal-content"><h3>➕ Клиент</h3>
-<label class="modal-label">Имя</label><input class="modal-input" id="clientName" placeholder="Введите имя">
-<label class="modal-label">Телефон</label><input class="modal-input" id="clientPhone" placeholder="+7 (___) ___-__-__">
-<label class="modal-label">Дата рождения</label><input type="date" class="modal-input" id="clientBirth">
-<div class="modal-buttons"><button id="cancelClientBtn">Отмена</button><button id="saveClientBtn">Сохранить</button></div></div></div>
+<!-- ИСТОРИЯ -->
+<div id="pageHistory" class="hidden">
+    <button class="home-btn">🏠 Домой</button>
+    <input class="search-box" id="historySearch" placeholder="🔍 Поиск">
+    <div class="filter-radio-group">
+        <label><input type="radio" name="histFilter" value="all" checked> Все</label>
+        <label><input type="radio" name="histFilter" value="completed"> Выполненные</label>
+        <label><input type="radio" name="histFilter" value="cancelled"> Отменённые</label>
+    </div>
+    <div id="historyList"></div>
+</div>
 
-<div id="recordModal" class="modal"><div class="modal-content"><h3>📝 Запись</h3>
-<label class="modal-label">Клиент</label><select class="modal-select" id="recordClient"></select>
-<button id="quickAddClientBtn" class="link-btn mb12">+ Новый клиент</button>
-<div class="flex mb8"><span style="font-size:.85rem">📞</span><a id="callClientLink" href="#" style="color:#27ae60;text-decoration:none;font-size:.8rem">Позвонить клиенту</a></div>
-<label class="modal-label">Дата</label><input type="date" class="modal-input" id="recordDate"><div class="modal-hint">Только сегодня или будущая дата</div>
-<label class="modal-label">Услуги</label><div id="servicesContainer"></div>
-<button id="addServiceRowBtn" class="small-btn mb12">+ Добавить услугу</button>
-<div class="total-display">Общая сумма: <span id="recordTotalDisplay">0</span>₽</div>
-<input type="hidden" id="recordPrice" value="0">
-<div class="modal-buttons"><button id="cancelRecordBtn">Отмена</button><button id="saveRecordBtn">Сохранить</button></div></div></div>
+<!-- РАСХОДЫ -->
+<div id="pageExpenses" class="hidden">
+    <button class="home-btn">🏠 Домой</button>
+    <button id="addExpenseBtn2" class="btn btn-orange mb12">➕ Добавить расход</button>
+    <div id="expensesList"></div>
+</div>
 
-<div id="expenseModal" class="modal"><div class="modal-content"><h3>➕ Расход</h3>
-<label class="modal-label">Сумма</label><input type="number" class="modal-input" id="expenseAmount" placeholder="Сумма">
-<label class="modal-label">Комментарий</label><input class="modal-input" id="expenseComment" placeholder="Комментарий">
-<div class="modal-buttons"><button id="cancelExpenseBtn">Отмена</button><button id="saveExpenseBtn">Сохранить</button></div></div></div>
+<!-- УСЛУГИ -->
+<div id="pageServices" class="hidden">
+    <button class="home-btn">🏠 Домой</button>
+    <button id="addServiceBtn" class="btn btn-primary">+ Добавить услугу</button>
+    <div id="servicesList"></div>
+</div>
 
-<div id="serviceModal" class="modal"><div class="modal-content"><h3 id="serviceModalTitle">➕ Услуга</h3>
-<label class="modal-label">Название</label><input class="modal-input" id="serviceName" placeholder="Например: Стрижка">
-<label class="modal-label">Цена по умолчанию</label><input type="number" class="modal-input" id="servicePrice" placeholder="0">
-<div class="modal-buttons"><button id="cancelServiceBtn">Отмена</button><button id="saveServiceBtn">Сохранить</button></div></div></div>
+<!-- БЭКАП -->
+<div id="pageBackup" class="hidden">
+    <button class="home-btn">🏠 Домой</button>
+    <div class="backup-panel"><h3>📤 Экспорт</h3><button id="exportBtn" class="btn btn-primary">Сохранить бэкап</button></div>
+    <div class="backup-panel"><h3>📥 Импорт</h3><input type="file" id="importFile" class="hidden"><button id="importBtn" class="btn btn-primary">Восстановить из файла</button></div>
+    <div class="backup-panel"><h3>🗑️ Сброс</h3><button id="resetBtn" class="btn btn-danger">Удалить всё</button></div>
+</div>
 
-<div id="inactiveDaysModal" class="modal"><div class="modal-content"><h3>⏰ Дней отсутствия</h3>
-<label class="modal-label">Показывать клиентов, которые не заходили более</label>
-<input type="number" class="modal-input" id="inactiveDaysInput" value="30" min="1">
-<div class="modal-buttons"><button id="cancelInactiveDaysBtn">Отмена</button><button id="saveInactiveDaysBtn">Применить</button></div></div></div>
+<!-- МОДАЛКА КЛИЕНТА -->
+<div id="clientModal" class="modal">
+    <div class="modal-content">
+        <h3 id="clientModalTitle">➕ Клиент</h3>
+        <label class="modal-label">Имя</label><input class="modal-input" id="clientName" placeholder="Введите имя">
+        <label class="modal-label">Телефон</label><input class="modal-input" id="clientPhone" placeholder="+7 (___) ___-__-__">
+        <label class="modal-label">Дата рождения</label><input type="date" class="modal-input" id="clientBirth">
+        <div class="modal-buttons"><button id="cancelClientBtn">Отмена</button><button id="saveClientBtn">Сохранить</button></div>
+    </div>
+</div>
 
-<div id="clientStatsModal" class="modal"><div class="modal-content"><h3 id="clientStatsTitle"></h3><div id="clientStatsContent"></div>
-<div class="card-actions mt14"><button id="createRecordForClientBtn" class="btn btn-success">+ Создать запись</button></div>
-<div class="card-actions mt8"><button id="editClientFromStatsBtn" class="small-btn">✏️ Редактировать</button><button id="deleteClientFromStatsBtn" class="small-btn">🗑️ Удалить</button></div>
-<button id="closeStatsBtn" class="btn btn-primary mt12">Закрыть</button></div></div>
+<!-- МОДАЛКА ЗАПИСИ -->
+<div id="recordModal" class="modal">
+    <div class="modal-content">
+        <h3>📝 Запись клиента</h3>
+        <label class="modal-label">Клиент</label>
+        <select class="modal-select" id="recordClientSelect">
+            <option value="">-- Выберите --</option>
+            <option value="__new__">+ Новый клиент</option>
+        </select>
+        <div id="newClientFields" class="hidden">
+            <label class="modal-label">Имя нового клиента</label><input class="modal-input" id="newClientName" placeholder="Имя">
+            <label class="modal-label">Телефон</label><input class="modal-input" id="newClientPhone" placeholder="+7 (___) ___-__-__">
+        </div>
+        <div class="flex mb8" id="callLinkRow" style="display:none">
+            <span style="font-size:.85rem">📞</span><a id="callClientLink" href="#" style="color:#27ae60;text-decoration:none;font-size:.8rem">Позвонить клиенту</a>
+        </div>
+        <label class="modal-label">Дата</label><input type="date" class="modal-input" id="recordDate">
+        <div class="modal-hint">Только сегодня или будущая дата</div>
+        <label class="modal-label">Услуги</label><div id="servicesContainer"></div>
+        <button id="addServiceRowBtn" class="small-btn mb12">+ Добавить услугу</button>
+        <div class="total-display">Общая сумма: <span id="recordTotalDisplay">0</span>₽</div>
+        <input type="hidden" id="recordPrice" value="0">
+        <div class="modal-buttons"><button id="cancelRecordBtn">Отмена</button><button id="saveRecordBtn">Сохранить</button></div>
+    </div>
+</div>
 
-<script src="script.js"></script>
+<!-- МОДАЛКА РАСХОДА -->
+<div id="expenseModal" class="modal">
+    <div class="modal-content">
+        <h3>➕ Расход</h3>
+        <label class="modal-label">Сумма</label><input type="number" class="modal-input" id="expenseAmount" placeholder="Сумма">
+        <label class="modal-label">Комментарий</label><input class="modal-input" id="expenseComment" placeholder="Комментарий">
+        <div class="modal-buttons"><button id="cancelExpenseBtn">Отмена</button><button id="saveExpenseBtn">Сохранить</button></div>
+    </div>
+</div>
+
+<!-- МОДАЛКА УСЛУГИ -->
+<div id="serviceModal" class="modal">
+    <div class="modal-content">
+        <h3 id="serviceModalTitle">➕ Услуга</h3>
+        <label class="modal-label">Название</label><input class="modal-input" id="serviceName" placeholder="Например: Стрижка">
+        <label class="modal-label">Цена по умолчанию</label><input type="number" class="modal-input" id="servicePrice" placeholder="0">
+        <div class="modal-buttons"><button id="cancelServiceBtn">Отмена</button><button id="saveServiceBtn">Сохранить</button></div>
+    </div>
+</div>
+
+<!-- МОДАЛКА ДНЕЙ -->
+<div id="inactiveDaysModal" class="modal">
+    <div class="modal-content">
+        <h3>⏰ Дней отсутствия</h3>
+        <label class="modal-label">Показывать клиентов, которые не заходили более</label>
+        <input type="number" class="modal-input" id="inactiveDaysInput" value="30" min="1">
+        <div class="modal-buttons"><button id="cancelInactiveDaysBtn">Отмена</button><button id="saveInactiveDaysBtn">Применить</button></div>
+    </div>
+</div>
+
+<!-- МОДАЛКА СТАТИСТИКИ -->
+<div id="clientStatsModal" class="modal">
+    <div class="modal-content">
+        <h3 id="clientStatsTitle"></h3><div id="clientStatsContent"></div>
+        <div class="card-actions mt14"><button id="createRecordForClientBtn" class="btn btn-success">📝 Запись клиента</button></div>
+        <div class="card-actions mt8">
+            <button id="editClientFromStatsBtn" class="small-btn">✏️ Редактировать</button>
+            <button id="deleteClientFromStatsBtn" class="small-btn">🗑️ Удалить</button>
+        </div>
+        <button id="closeStatsBtn" class="btn btn-primary mt12">Закрыть</button>
+    </div>
+</div>
+
+<script>
+// ===== ДАННЫЕ =====
+let data = JSON.parse(localStorage.getItem('data')) || {
+    clients: [], records: [], expenses: [],
+    services: [{id:1,name:'Увеличение губ',price:0},{id:2,name:'Увеличение губ 0.5',price:0},{id:3,name:'Носогубки',price:0},{id:4,name:'Биоревитализация',price:0},{id:5,name:'Липолитики',price:0}],
+    inactiveDays:30
+};
+let currentPage = 'dashboard';
+let editClientId = null, editServiceId = null, statsClientId = null;
+
+// ===== УТИЛИТЫ =====
+function save() { localStorage.setItem('data',JSON.stringify(data)); setPage('dashboard'); toast('✓'); }
+function toast(m){let t=document.createElement('div');t.className='toast';t.innerText=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2000);}
+function nextId(a){return a.length?Math.max(...a.map(x=>x.id))+1:1;}
+function clientName(id){let c=data.clients.find(x=>x.id===id);return c?c.name:'Удалён';}
+function clientPhone(id){let c=data.clients.find(x=>x.id===id);return c?c.phone||'':'';}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function daysSince(d){if(!d)return 9999;return Math.floor((new Date()-new Date(d))/86400000);}
+function updateLastVisit(id){
+    let last=data.records.filter(r=>r.clientId===id&&r.status==='completed').sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    let c=data.clients.find(x=>x.id===id);
+    if(c){c.lastDate=last?last.date:'';c.lastService=last?last.service:'';}
+}
+function monthExp(){let n=new Date(),m=n.getMonth(),y=n.getFullYear();return data.expenses.filter(e=>{let d=new Date(e.date);return d.getMonth()===m&&d.getFullYear()===y;}).reduce((s,e)=>s+e.amount,0);}
+function show(id){document.getElementById(id).style.display='flex';}
+function hide(id){document.getElementById(id).style.display='none';}
+
+// ===== НАВИГАЦИЯ =====
+function setPage(p){
+    currentPage=p;
+    ['Dashboard','Clients','Records','History','Expenses','Services','Backup'].forEach(n=>{
+        document.getElementById('page'+n).style.display=(p===n.toLowerCase())?'block':'none';
+    });
+    document.getElementById('pageTitle').innerText={dashboard:'Главная',clients:'Клиенты',records:'Активные записи',history:'История',expenses:'Расходы',services:'Услуги',backup:'Бэкап'}[p]||'';
+    if(p==='dashboard')renderDashboard();
+    else if(p==='clients')renderClients();
+    else if(p==='records')renderActive();
+    else if(p==='history')renderHistory();
+    else if(p==='expenses')renderExpenses();
+    else if(p==='services')renderServices();
+}
+
+// ===== РЕНДЕРЫ =====
+function renderDashboard(){
+    let n=new Date(),m=n.getMonth(),y=n.getFullYear();
+    let mr=data.records.filter(r=>r.status==='completed'&&r.date&&new Date(r.date).getMonth()===m&&new Date(r.date).getFullYear()===y);
+    let rev=mr.reduce((s,r)=>s+(r.price||0),0),exp=monthExp(),canc=data.records.filter(r=>r.status==='cancelled'&&r.date&&new Date(r.date).getMonth()===m&&new Date(r.date).getFullYear()===y).length;
+    let act=data.records.filter(r=>r.status==='active').length,avg=mr.length?Math.round(rev/mr.length):0;
+    let ss={};mr.forEach(r=>{if(r.service)ss[r.service]=(ss[r.service]||0)+1;});
+    let top=Object.entries(ss).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+    document.getElementById('statTotalClients').innerText=data.clients.length;
+    document.getElementById('statActive').innerText=act;
+    document.getElementById('statCompleted').innerText=mr.length;
+    document.getElementById('statCancelled').innerText=canc;
+    document.getElementById('statRevenue').innerText=rev+'₽';
+    document.getElementById('statCost').innerText=exp+'₽';
+    document.getElementById('statProfit').innerText=(rev-exp)+'₽';
+    document.getElementById('statAvgCheck').innerText=avg+'₽';
+    document.getElementById('statTopService').innerText=top.length>15?top.slice(0,15)+'…':top;
+    document.getElementById('inactiveDaysLabel').innerText=data.inactiveDays;
+    let list=data.clients.filter(c=>daysSince(c.lastDate)>data.inactiveDays&&c.lastDate).sort((a,b)=>daysSince(b.lastDate)-daysSince(a.lastDate));
+    let h='';
+    if(!list.length)h='<div style="text-align:center;color:#999;padding:12px">Все активны 👍</div>';
+    else list.forEach(c=>{let d=daysSince(c.lastDate),cls=d>60?'days-danger':'days-warn';
+        h+=`<div class="card pad12 mb8" style="cursor:default"><div class="flex between mb8"><span class="card-name" style="cursor:pointer" onclick="showClientStats(${c.id})">${c.name}</span><span class="days-badge ${cls}">${d} дн</span></div><div class="flex end gap12">${c.phone?`<button class="copy-btn" onclick="copyPhone('${c.phone}')">📋</button><button class="call-btn" onclick="callPhone('${c.phone}')">📞</button>`:'<span style="font-size:.7rem;color:#999">Нет телефона</span>'}</div></div>`;});
+    document.getElementById('inactiveList').innerHTML=h;
+}
+function copyPhone(p){navigator.clipboard.writeText(p).then(()=>toast('📋 Скопировано'));}
+function callPhone(p){window.open('tel:'+p,'_self');}
+
+function renderClients(){
+    let s=document.getElementById('clientSearch').value.toLowerCase();
+    let h='';
+    data.clients.filter(c=>c.name.toLowerCase().includes(s)||(c.phone&&c.phone.includes(s))).forEach(c=>{
+        let all=data.records.filter(r=>r.clientId===c.id),done=all.filter(r=>r.status==='completed').length,canc=all.filter(r=>r.status==='cancelled').length;
+        let t=done+canc,p=t?Math.round(done/t*100):0;
+        h+=`<div class="card" onclick="showClientStats(${c.id})"><div class="card-header"><span class="card-name">${c.name}</span><span style="font-size:.7rem;color:#999">ID:${c.id}</span></div><div class="card-row"><span>📞</span><span>${c.phone||'—'}</span></div><div class="card-row"><span>🎂</span><span>${c.birth||'—'}</span></div><div class="card-row"><span>📅</span><span>${c.lastDate||'—'}</span></div><div class="card-row"><span>💉</span><span>${c.lastService||'—'}</span></div><div class="card-row"><span>⭐ Рейтинг</span><span>${p}% (${done}/${t})</span></div><div class="progress-bar"><div class="progress-fill" style="width:${p}%"></div></div></div>`;
+    });
+    document.getElementById('clientsList').innerHTML=h||'<div style="text-align:center;color:#999;padding:20px">Нет клиентов</div>';
+}
+
+function renderActive(){
+    let s=document.getElementById('recordsSearch').value.toLowerCase();
+    let h='';
+    data.records.filter(r=>r.status==='active'&&clientName(r.clientId).toLowerCase().includes(s)).forEach(r=>{
+        let p=clientPhone(r.clientId);
+        h+=`<div class="card"><div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge badge-blue">📝</span></div><div class="card-row"><span>📅</span><span>${r.date||'—'}</span></div><div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div><div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div><div class="card-actions">${p?`<button class="call-btn" onclick="event.stopPropagation();callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="event.stopPropagation();completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="event.stopPropagation();cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
+    });
+    document.getElementById('recordsList').innerHTML=h||'<div style="text-align:center;color:#999;padding:20px">Нет активных записей</div>';
+}
+function completeRecord(id){let r=data.records.find(x=>x.id===id);if(r&&r.status==='active'){r.status='completed';updateLastVisit(r.clientId);save();}}
+function cancelRecord(id){if(confirm('Отменить?')){let r=data.records.find(x=>x.id===id);if(r){r.status='cancelled';updateLastVisit(r.clientId);save();}}}
+
+function renderHistory(){
+    let s=document.getElementById('historySearch').value.toLowerCase(),f=document.querySelector('input[name="histFilter"]:checked')?.value||'all';
+    let h='';
+    data.records.filter(r=>(r.status==='completed'||r.status==='cancelled')&&clientName(r.clientId).toLowerCase().includes(s)&&(f==='all'||r.status===f)).forEach(r=>{
+        let st=r.status==='completed'?'✅ Выполнена':'❌ Отменена',sc=r.status==='completed'?'badge-green':'badge-red';
+        h+=`<div class="card"><div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge ${sc}">${st}</span></div><div class="card-row"><span>📅</span><span>${r.date||'—'}</span></div><div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div><div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div><div class="card-actions"><button class="small-btn" onclick="event.stopPropagation();deleteRecord(${r.id})">🗑️</button></div></div>`;
+    });
+    document.getElementById('historyList').innerHTML=h||'<div style="text-align:center;color:#999;padding:20px">Нет записей</div>';
+}
+function deleteRecord(id){if(confirm('Удалить?')){data.records=data.records.filter(r=>r.id!==id);save();}}
+
+function renderExpenses(){
+    let h='';
+    [...data.expenses].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(e=>{
+        h+=`<div class="card"><div class="card-row"><span>📅</span><span>${e.date||'—'}</span></div><div class="card-row"><span>💰</span><span>${e.amount}₽</span></div><div class="card-row"><span>📝</span><span>${e.comment||'—'}</span></div><div class="card-actions"><button class="small-btn" onclick="event.stopPropagation();deleteExpense(${e.id})">🗑️</button></div></div>`;
+    });
+    document.getElementById('expensesList').innerHTML=h||'<div style="text-align:center;color:#999;padding:20px">Нет расходов</div>';
+}
+function deleteExpense(id){if(confirm('Удалить?')){data.expenses=data.expenses.filter(e=>e.id!==id);save();}}
+
+function renderServices(){
+    let h='';
+    data.services.forEach(s=>{
+        h+=`<div class="card"><div class="card-header"><span class="card-name">${s.name}</span><span style="font-size:.85rem;color:#666">${s.price?s.price+'₽':'без цены'}</span></div><div class="card-actions"><button class="small-btn" onclick="event.stopPropagation();editService(${s.id})">✏️</button><button class="small-btn" onclick="event.stopPropagation();deleteService(${s.id})">🗑️</button></div></div>`;
+    });
+    document.getElementById('servicesList').innerHTML=h||'<div style="text-align:center;color:#999;padding:20px">Нет услуг</div>';
+}
+function editService(id){let s=data.services.find(x=>x.id===id);if(s){document.getElementById('serviceName').value=s.name;document.getElementById('servicePrice').value=s.price||'';editServiceId=id;document.getElementById('serviceModalTitle').innerText='✏️ Услуга';show('serviceModal');}}
+function deleteService(id){if(confirm('Удалить?')){data.services=data.services.filter(s=>s.id!==id);save();}}
+
+// ===== МОДАЛКА КЛИЕНТА =====
+document.getElementById('addClientBtn2').onclick=function(){
+    editClientId=null;document.getElementById('clientName').value='';document.getElementById('clientPhone').value='';document.getElementById('clientBirth').value='';
+    document.getElementById('clientModalTitle').innerText='➕ Клиент';show('clientModal');
+};
+document.getElementById('saveClientBtn').onclick=function(){
+    let name=document.getElementById('clientName').value.trim();if(!name)return alert('Введите имя');
+    let c={id:editClientId||nextId(data.clients),name,phone:document.getElementById('clientPhone').value,birth:document.getElementById('clientBirth').value,lastDate:'',lastService:''};
+    if(editClientId){let i=data.clients.findIndex(x=>x.id===editClientId);if(i!==-1)data.clients[i]=c;}else data.clients.push(c);
+    save();hide('clientModal');
+};
+document.getElementById('cancelClientBtn').onclick=function(){hide('clientModal');};
+
+// ===== МОДАЛКА ЗАПИСИ =====
+function openRecordModal(clientId){
+    let sel=document.getElementById('recordClientSelect');
+    sel.innerHTML='<option value="">-- Выберите --</option><option value="__new__">+ Новый клиент</option>';
+    data.clients.forEach(c=>{let o=document.createElement('option');o.value=c.id;o.textContent=c.name;if(c.id===clientId)o.selected=true;sel.appendChild(o);});
+    document.getElementById('newClientFields').classList.add('hidden');
+    document.getElementById('callLinkRow').style.display=clientId?'flex':'none';
+    document.getElementById('newClientName').value='';document.getElementById('newClientPhone').value='';
+    document.getElementById('recordDate').value=todayStr();document.getElementById('recordDate').setAttribute('min',todayStr());
+    document.getElementById('servicesContainer').innerHTML='';addServiceRow('');updateTotal();
+    if(clientId)updateCallLink();
+    show('recordModal');
+}
+document.getElementById('recordClientSelect').onchange=function(){
+    let v=this.value;
+    if(v==='__new__'){document.getElementById('newClientFields').classList.remove('hidden');document.getElementById('callLinkRow').style.display='none';}
+    else if(v){document.getElementById('newClientFields').classList.add('hidden');document.getElementById('callLinkRow').style.display='flex';updateCallLink();}
+    else{document.getElementById('newClientFields').classList.add('hidden');document.getElementById('callLinkRow').style.display='none';}
+};
+function updateCallLink(){let p=clientPhone(parseInt(document.getElementById('recordClientSelect').value));let l=document.getElementById('callClientLink');if(p){l.href='tel:'+p;l.style.display='inline';}else{l.href='#';l.style.display='none';}}
+function addServiceRow(name){
+    let c=document.getElementById('servicesContainer'),r=document.createElement('div');r.className='service-row';
+    let s=document.createElement('select');s.className='modal-select';s.style.marginBottom='0';
+    data.services.forEach(v=>{let o=document.createElement('option');o.value=v.name;o.textContent=v.name+(v.price?` (${v.price}₽)`:'');o.dataset.price=v.price||0;if(v.name===name)o.selected=true;s.appendChild(o);});
+    s.onchange=updateTotal;
+    let b=document.createElement('button');b.className='small-btn';b.style.flexShrink='0';b.textContent='✕';b.onclick=function(){r.remove();updateTotal();};
+    r.appendChild(s);r.appendChild(b);c.appendChild(r);updateTotal();
+}
+function updateTotal(){let t=0;document.querySelectorAll('#servicesContainer select').forEach(s=>{let o=s.options[s.selectedIndex];if(o&&o.dataset.price)t+=parseInt(o.dataset.price)||0;});document.getElementById('recordPrice').value=t;document.getElementById('recordTotalDisplay').innerText=t;}
+
+document.getElementById('addServiceRowBtn').onclick=function(){addServiceRow('');};
+document.getElementById('saveRecordBtn').onclick=function(){
+    let v=document.getElementById('recordClientSelect').value,cid;
+    if(v==='__new__'){let n=document.getElementById('newClientName').value.trim();if(!n)return alert('Введите имя');let c={id:nextId(data.clients),name:n,phone:document.getElementById('newClientPhone').value,birth:'',lastDate:'',lastService:''};data.clients.push(c);cid=c.id;}
+    else{cid=parseInt(v);if(!cid)return alert('Выберите клиента');}
+    if(document.getElementById('recordDate').value<todayStr())return alert('Нельзя задним числом!');
+    let names=[];document.querySelectorAll('#servicesContainer select').forEach(s=>{if(s.value)names.push(s.value);});
+    if(!names.length)return alert('Выберите услугу');
+    let r={id:nextId(data.records),clientId:cid,date:document.getElementById('recordDate').value,service:names.join(' + '),price:parseInt(document.getElementById('recordPrice').value)||0,status:'active'};
+    data.records.push(r);save();hide('recordModal');
+};
+document.getElementById('cancelRecordBtn').onclick=function(){hide('recordModal');};
+
+// ===== МОДАЛКА РАСХОДА =====
+document.getElementById('addExpenseBtn').onclick=document.getElementById('addExpenseBtn2').onclick=function(){document.getElementById('expenseAmount').value='';document.getElementById('expenseComment').value='';show('expenseModal');};
+document.getElementById('saveExpenseBtn').onclick=function(){let a=parseInt(document.getElementById('expenseAmount').value);if(!a||a<=0)return alert('Введите сумму');data.expenses.push({id:nextId(data.expenses),amount:a,comment:document.getElementById('expenseComment').value||'Без комментария',date:todayStr()});save();hide('expenseModal');};
+document.getElementById('cancelExpenseBtn').onclick=function(){hide('expenseModal');};
+
+// ===== МОДАЛКА УСЛУГИ =====
+document.getElementById('addServiceBtn').onclick=function(){editServiceId=null;document.getElementById('serviceName').value='';document.getElementById('servicePrice').value='';document.getElementById('serviceModalTitle').innerText='➕ Услуга';show('serviceModal');};
+document.getElementById('saveServiceBtn').onclick=function(){let n=document.getElementById('serviceName').value.trim();if(!n)return alert('Введите название');let s={id:editServiceId||nextId(data.services),name:n,price:parseInt(document.getElementById('servicePrice').value)||0};if(editServiceId){let i=data.services.findIndex(x=>x.id===editServiceId);if(i!==-1)data.services[i]=s;}else data.services.push(s);save();hide('serviceModal');};
+document.getElementById('cancelServiceBtn').onclick=function(){hide('serviceModal');};
+
+// ===== СТАТИСТИКА КЛИЕНТА =====
+function showClientStats(id){
+    let c=data.clients.find(x=>x.id===id);if(!c)return;statsClientId=id;
+    let all=data.records.filter(r=>r.clientId===id),done=all.filter(r=>r.status==='completed').length,canc=all.filter(r=>r.status==='cancelled').length;
+    let t=done+canc,p=t?Math.round(done/t*100):0,sum=all.filter(r=>r.status==='completed').reduce((s,r)=>s+(r.price||0),0);
+    document.getElementById('clientStatsContent').innerHTML=`<div class="card"><div class="card-row"><span>👤</span><span>${c.name}</span></div><div class="card-row"><span>📞</span><span>${c.phone||'—'}</span></div><div class="card-row"><span>🎂</span><span>${c.birth||'—'}</span></div><div class="card-row"><span>✅</span><span>${done}</span></div><div class="card-row"><span>❌</span><span>${canc}</span></div><div class="card-row"><span>📊</span><span>${t}</span></div><div class="card-row"><span>⭐</span><span>${p}%</span></div><div class="progress-bar"><div class="progress-fill" style="width:${p}%"></div></div><div class="card-row"><span>💰</span><span>${sum}₽</span></div></div>`;
+    document.getElementById('clientStatsTitle').innerText='Статистика: '+c.name;show('clientStatsModal');
+}
+document.getElementById('closeStatsBtn').onclick=function(){hide('clientStatsModal');};
+document.getElementById('createRecordForClientBtn').onclick=function(){if(!statsClientId)return;hide('clientStatsModal');openRecordModal(statsClientId);};
+document.getElementById('editClientFromStatsBtn').onclick=function(){
+    if(!statsClientId)return;let c=data.clients.find(x=>x.id===statsClientId);if(!c)return;
+    hide('clientStatsModal');document.getElementById('clientName').value=c.name;document.getElementById('clientPhone').value=c.phone||'';document.getElementById('clientBirth').value=c.birth||'';
+    editClientId=statsClientId;document.getElementById('clientModalTitle').innerText='✏️ Клиент';show('clientModal');
+};
+document.getElementById('deleteClientFromStatsBtn').onclick=function(){if(!statsClientId)return;if(confirm('Удалить клиента и все записи?')){data.clients=data.clients.filter(x=>x.id!==statsClientId);data.records=data.records.filter(r=>r.clientId!==statsClientId);statsClientId=null;hide('clientStatsModal');save();}};
+
+// ===== ПРОЧЕЕ =====
+document.getElementById('inactiveTitle').onclick=function(e){e.stopPropagation();document.getElementById('inactiveDaysInput').value=data.inactiveDays;show('inactiveDaysModal');};
+document.getElementById('saveInactiveDaysBtn').onclick=function(){let v=parseInt(document.getElementById('inactiveDaysInput').value);if(v&&v>=1){data.inactiveDays=v;save();}hide('inactiveDaysModal');};
+document.getElementById('cancelInactiveDaysBtn').onclick=function(){hide('inactiveDaysModal');};
+
+document.getElementById('backupLink').onclick=function(){setPage('backup');};
+document.getElementById('exportBtn').onclick=function(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download='crm_'+Date.now()+'.json';a.click();toast('💾 Бэкап сохранён');};
+document.getElementById('importBtn').onclick=function(){document.getElementById('importFile').click();};
+document.getElementById('importFile').onchange=function(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=function(ev){try{data=JSON.parse(ev.target.result);save();toast('✅ Восстановлено');}catch(e){toast('❌ Ошибка');}};r.readAsText(f);e.target.value='';};
+document.getElementById('resetBtn').onclick=function(){if(confirm('Удалить всё?')){data={clients:[],records:[],expenses:[],services:[{id:1,name:'Консультация',price:0}],inactiveDays:30};save();toast('🗑️ Удалено');}};
+
+document.querySelectorAll('.dash-stat[data-nav]').forEach(el=>el.onclick=function(){
+    let n=this.dataset.nav;
+    if(n==='clients')setPage('clients');else if(n==='active')setPage('records');
+    else if(n==='completed'||n==='cancelled'){setPage('history');setTimeout(()=>{let rb=document.querySelector('input[name="histFilter"][value="'+n+'"]');if(rb){rb.checked=true;renderHistory();}},50);}
+    else if(n==='expenses')setPage('expenses');else if(n==='services')setPage('services');
+});
+document.querySelectorAll('.home-btn').forEach(b=>b.onclick=function(){setPage('dashboard');});
+document.getElementById('clientSearch').oninput=renderClients;
+document.getElementById('recordsSearch').oninput=renderActive;
+document.getElementById('historySearch').oninput=renderHistory;
+document.querySelectorAll('input[name="histFilter"]').forEach(r=>r.onchange=renderHistory);
+
+document.getElementById('addRecordBtn').onclick=function(){openRecordModal(null);};
+document.getElementById('addRecordBtn2').onclick=function(){openRecordModal(null);};
+
+// Тема
+let dark=localStorage.getItem('dark')==='true';if(dark)document.body.classList.add('dark');
+document.getElementById('themeBtn').innerText=dark?'☀️':'🌙';
+document.getElementById('themeBtn').onclick=function(){dark=!dark;document.body.classList.toggle('dark',dark);document.getElementById('themeBtn').innerText=dark?'☀️':'🌙';localStorage.setItem('dark',dark);};
+
+// Старт
+setPage('dashboard');
+window.onscroll=function(){let b=document.querySelector('.scroll-top');if(b)b.style.display=window.scrollY>300?'flex':'none';};
+let sb=document.createElement('div');sb.className='scroll-top';sb.innerHTML='⬆';sb.onclick=function(){window.scrollTo({top:0,behavior:'smooth'});};document.body.appendChild(sb);
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
+</script>
 </body>
 </html>
