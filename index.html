@@ -69,7 +69,6 @@
 
 <!-- КЛИЕНТЫ -->
 <div id="pageClients" class="hidden">
-    <button class="home-btn">🏠 Домой</button>
     <input class="search-box" id="clientSearch" placeholder="🔍 Поиск">
     <button id="addClientBtn2" class="btn btn-primary">+ Клиент</button>
     <div id="clientsList"></div>
@@ -77,7 +76,6 @@
 
 <!-- АКТИВНЫЕ ЗАПИСИ -->
 <div id="pageRecords" class="hidden">
-    <button class="home-btn">🏠 Домой</button>
     <input class="search-box" id="recordsSearch" placeholder="🔍 Поиск">
     <button id="addRecordBtn2" class="btn btn-success">📝 Запись клиента</button>
     <div id="recordsList"></div>
@@ -85,7 +83,6 @@
 
 <!-- ИСТОРИЯ -->
 <div id="pageHistory" class="hidden">
-    <button class="home-btn">🏠 Домой</button>
     <input class="search-box" id="historySearch" placeholder="🔍 Поиск">
     <div class="filter-radio-group">
         <label><input type="radio" name="histFilter" value="all" checked> Все</label>
@@ -97,21 +94,18 @@
 
 <!-- РАСХОДЫ -->
 <div id="pageExpenses" class="hidden">
-    <button class="home-btn">🏠 Домой</button>
     <button id="addExpenseBtn2" class="btn btn-orange mb12">➕ Добавить расход</button>
     <div id="expensesList"></div>
 </div>
 
 <!-- УСЛУГИ -->
 <div id="pageServices" class="hidden">
-    <button class="home-btn">🏠 Домой</button>
     <button id="addServiceBtn" class="btn btn-primary">+ Добавить услугу</button>
     <div id="servicesList"></div>
 </div>
 
 <!-- БЭКАП -->
 <div id="pageBackup" class="hidden">
-    <button class="home-btn">🏠 Домой</button>
     <div class="backup-panel"><h3>📤 Экспорт</h3><button id="exportBtn" class="btn btn-primary">Сохранить бэкап</button></div>
     <div class="backup-panel"><h3>📥 Импорт</h3><input type="file" id="importFile" class="hidden"><button id="importBtn" class="btn btn-primary">Восстановить из файла</button></div>
     <div class="backup-panel"><h3>🗑️ Сброс</h3><button id="resetBtn" class="btn btn-danger">Удалить всё</button></div>
@@ -196,6 +190,10 @@
         </div>
         <button id="closeStatsBtn" class="btn btn-primary mt12">Закрыть</button>
     </div>
+</div>
+<!-- КНОПКА НАЗАД -->
+<div class="nav-back" id="navBack" style="display:none">
+    <button class="btn" onclick="window.goHome()">← Назад</button>
 </div>
 
 <script type="module" src="js/app.js"></script>

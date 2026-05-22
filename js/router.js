@@ -18,7 +18,11 @@ const titles = {
     backup: 'Бэкап'
 };
 
-// При любом save() — перерисовываем текущую страницу
+let onPageChange = null;
+export function setOnPageChange(fn) {
+    onPageChange = fn;
+}
+
 onDataChange(() => {
     renderCurrentPage();
 });
@@ -44,6 +48,6 @@ export function setPage(p) {
 
     document.getElementById('pageTitle').innerText = titles[p] || '';
 
-    // Возвращаемся на главную — всегда перерисовываем
+    if (onPageChange) onPageChange(p);
     renderCurrentPage();
 }

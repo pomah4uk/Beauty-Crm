@@ -21,7 +21,7 @@ body {
     font-family: system-ui;
     background: var(--bg);
     color: var(--text);
-    padding: 20px 16px 90px;
+    padding: 20px 16px 80px;
     transition: .3s;
 }
 h1 {
@@ -329,4 +329,25 @@ body.dark .home-btn {
 .period-tab.active {
     background: #2c3e50 !important;
     color: #fff !important;
+}
+.nav-back {
+    position: fixed;
+    bottom: 20px;
+    left: 16px;
+    z-index: 100;
+}
+.nav-back .btn {
+    width: auto;
+    padding: 10px 20px;
+    border-radius: 30px;
+    margin-bottom: 0;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid #e0e4e8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-size: .9rem;
+}
+body.dark .nav-back .btn {
+    border-color: #3b4a54;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
