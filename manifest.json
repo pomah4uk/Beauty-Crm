@@ -1,15 +1,15 @@
 {
-  "name": "CRM Мастер",
-  "short_name": "CRM",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#f1f2f6",
-  "theme_color": "#2c3e50",
-  "icons": [
-    {
-      "src": "icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    }
-  ]
+    "name": "CRM Мастер",
+    "short_name": "CRM",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#f1f2f6",
+    "theme_color": "#2c3e50",
+    "icons": [
+        {
+            "src": "icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
 }

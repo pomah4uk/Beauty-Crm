@@ -1,0 +1,70 @@
+// ===== ДАННЫЕ =====
+export let data = JSON.parse(localStorage.getItem('data')) || {
+    clients: [],
+    records: [],
+    expenses: [],
+    services: [
+        { id: 1, name: 'Увеличение губ', price: 0 },
+        { id: 2, name: 'Увеличение губ 0.5', price: 0 },
+        { id: 3, name: 'Носогубки', price: 0 },
+        { id: 4, name: 'Биоревитализация', price: 0 },
+        { id: 5, name: 'Липолитики', price: 0 }
+    ],
+    inactiveDays: 30
+};
+
+// Слушатели изменений
+const listeners = [];
+
+export function onDataChange(fn) {
+    listeners.push(fn);
+}
+
+export function save() {
+    localStorage.setItem('data', JSON.stringify(data));
+    listeners.forEach(fn => fn());
+}
+
+export function nextId(arr) {
+    return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1;
+}
+
+export function clientName(id) {
+    let c = data.clients.find(x => x.id === id);
+    return c ? c.name : 'Удалён';
+}
+
+export function clientPhone(id) {
+    let c = data.clients.find(x => x.id === id);
+    return c ? c.phone || '' : '';
+}
+
+export function todayStr() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+export function daysSince(d) {
+    if (!d) return 9999;
+    return Math.floor((new Date() - new Date(d)) / 86400000);
+}
+
+export function updateLastVisit(id) {
+    let last = data.records
+        .filter(r => r.clientId === id && r.status === 'completed')
+        .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    let c = data.clients.find(x => x.id === id);
+    if (c) {
+        c.lastDate = last ? last.date : '';
+        c.lastService = last ? last.service : '';
+    }
+}
+
+export function monthExp() {
+    let n = new Date(), m = n.getMonth(), y = n.getFullYear();
+    return data.expenses
+        .filter(e => {
+            let d = new Date(e.date);
+            return d.getMonth() === m && d.getFullYear() === y;
+        })
+        .reduce((s, e) => s + e.amount, 0);
+}
