@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="CRM Мастер">
     <meta name="theme-color" content="#f1f2f6">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/style.css">
     <title>CRM Мастер</title>
 </head>
 <body>
@@ -192,7 +192,7 @@ let data = JSON.parse(localStorage.getItem('data')) || {
     inactiveDays:30
 };
 let currentPage = 'dashboard';
-let editClientId = null, editServiceId = null, statsClientId = null;
+let editClientId = null, editServiceId = null, statsClientId = null, editRecordId = null;
 
 // ===== УТИЛИТЫ =====
 function save() { localStorage.setItem('data',JSON.stringify(data)); setPage('dashboard'); toast('✓'); }
@@ -252,7 +252,7 @@ function renderDashboard(){
                 let p = clientPhone(r.clientId);
                 h += `<div class="card pad12 mb8" style="cursor:default">
                     <div class="flex between mb8"><span class="card-name">${clientName(r.clientId)}</span><span style="font-size:.85rem;color:#666">${r.time||'12:00'} — ${r.service||'—'}</span></div>
-                    <div class="flex end gap12">${p?`<button class="call-btn" onclick="callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
+                    <div class="flex end gap12">${p?`<button class="call-btn" onclick="callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="editRecord(${r.id})" style="background:#f39c12;color:#fff">✏️</button><button class="small-btn" onclick="completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
             });
         }
         document.getElementById(elId).innerHTML = h;
@@ -305,12 +305,33 @@ function renderActive(){
     let h='';
     data.records.filter(r=>r.status==='active'&&clientName(r.clientId).toLowerCase().includes(s)).forEach(r=>{
         let p=clientPhone(r.clientId);
-        h+=`<div class="card"><div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge badge-blue">📝</span></div><div class="card-row"><span>📅</span><span>${r.date||'—'} ${r.time||'12:00'}</span></div><div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div><div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div><div class="card-actions">${p?`<button class="call-btn" onclick="event.stopPropagation();callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="event.stopPropagation();completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="event.stopPropagation();cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
+        h+=`<div class="card"><div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge badge-blue">📝</span></div><div class="card-row"><span>📅</span><span>${r.date||'—'} ${r.time||'12:00'}</span></div><div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div><div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div><div class="card-actions">${p?`<button class="call-btn" onclick="event.stopPropagation();callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="event.stopPropagation();editRecord(${r.id})" style="background:#f39c12;color:#fff">✏️</button><button class="small-btn" onclick="event.stopPropagation();completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="event.stopPropagation();cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
     });
     document.getElementById('recordsList').innerHTML=h||'<div style="text-align:center;color:#999;padding:20px">Нет активных записей</div>';
 }
 function completeRecord(id){let r=data.records.find(x=>x.id===id);if(r&&r.status==='active'){r.status='completed';updateLastVisit(r.clientId);save();}}
 function cancelRecord(id){if(confirm('Отменить?')){let r=data.records.find(x=>x.id===id);if(r){r.status='cancelled';updateLastVisit(r.clientId);save();}}}
+function editRecord(id){
+    let r=data.records.find(x=>x.id===id);
+    if(!r||r.status!=='active')return;
+    let sel=document.getElementById('recordClientSelect');
+    sel.innerHTML='';
+    data.clients.forEach(c=>{let o=document.createElement('option');o.value=c.id;o.textContent=c.name;if(c.id===r.clientId)o.selected=true;sel.appendChild(o);});
+    document.getElementById('newClientFields').classList.add('hidden');
+    document.getElementById('callLinkRow').style.display='flex';
+    updateCallLink();
+    document.getElementById('recordDate').value=r.date;
+    document.getElementById('recordDate').setAttribute('min',todayStr());
+    document.getElementById('recordTime').value=r.time||'12:00';
+    document.getElementById('servicesContainer').innerHTML='';
+    let servicesList=r.service.split(' + ');
+    servicesList.forEach(svc=>addServiceRow(svc));
+    updateTotal();
+    document.getElementById('recordPrice').value=r.price;
+    document.getElementById('recordTotalDisplay').innerText=r.price;
+    editRecordId=id;
+    show('recordModal');
+}
 
 function renderHistory(){
     let s=document.getElementById('historySearch').value.toLowerCase(),f=document.querySelector('input[name="histFilter"]:checked')?.value||'all';
@@ -357,6 +378,7 @@ document.getElementById('cancelClientBtn').onclick=function(){hide('clientModal'
 
 // ===== МОДАЛКА ЗАПИСИ =====
 function openRecordModal(clientId){
+    editRecordId=null;
     let sel=document.getElementById('recordClientSelect');
     sel.innerHTML='<option value="">-- Выберите --</option><option value="__new__">+ Новый клиент</option>';
     data.clients.forEach(c=>{let o=document.createElement('option');o.value=c.id;o.textContent=c.name;if(c.id===clientId)o.selected=true;sel.appendChild(o);});
@@ -395,10 +417,12 @@ document.getElementById('saveRecordBtn').onclick=function(){
     let names=[];document.querySelectorAll('#servicesContainer select').forEach(s=>{if(s.value)names.push(s.value);});
     if(!names.length)return alert('Выберите услугу');
     let timeVal=document.getElementById('recordTime').value||'12:00';
-    let r={id:nextId(data.records),clientId:cid,date:document.getElementById('recordDate').value,time:timeVal,service:names.join(' + '),price:parseInt(document.getElementById('recordPrice').value)||0,status:'active'};
-    data.records.push(r);save();hide('recordModal');
+    let r={id:editRecordId||nextId(data.records),clientId:cid,date:document.getElementById('recordDate').value,time:timeVal,service:names.join(' + '),price:parseInt(document.getElementById('recordPrice').value)||0,status:'active'};
+    if(editRecordId){let i=data.records.findIndex(x=>x.id===editRecordId);if(i!==-1)data.records[i]=r;editRecordId=null;}
+    else data.records.push(r);
+    save();hide('recordModal');
 };
-document.getElementById('cancelRecordBtn').onclick=function(){hide('recordModal');};
+document.getElementById('cancelRecordBtn').onclick=function(){editRecordId=null;hide('recordModal');};
 
 // ===== МОДАЛКА РАСХОДА =====
 document.getElementById('addExpenseBtn').onclick=document.getElementById('addExpenseBtn2').onclick=function(){document.getElementById('expenseAmount').value='';document.getElementById('expenseComment').value='';show('expenseModal');};
