@@ -3,17 +3,74 @@
 import { data, clientName, clientPhone, todayStr, daysSince, updateLastVisit, monthExp, save } from './data.js';
 import { toast, copyPhone, callPhone } from './utils.js';
 
+// ===== ПЕРИОД =====
+let currentPeriod = 'month';
+let currentDate = new Date();
+
+export function setPeriod(period) {
+    currentPeriod = period;
+    currentDate = new Date();
+    document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.period-tab[data-period="${period}"]`)?.classList.add('active');
+    renderDashboard();
+}
+
+export function shiftPeriod(dir) {
+    if (currentPeriod === 'day') currentDate.setDate(currentDate.getDate() + dir);
+    else if (currentPeriod === 'month') currentDate.setMonth(currentDate.getMonth() + dir);
+    else currentDate.setFullYear(currentDate.getFullYear() + dir);
+    renderDashboard();
+}
+
 // ===== ГЛАВНАЯ =====
 export function renderDashboard() {
-    let n = new Date(), m = n.getMonth(), y = n.getFullYear();
-    let mr = data.records.filter(r => r.status === 'completed' && r.date && new Date(r.date).getMonth() === m && new Date(r.date).getFullYear() === y);
-    let rev = mr.reduce((s, r) => s + (r.price || 0), 0);
-    let exp = monthExp();
-    let canc = data.records.filter(r => r.status === 'cancelled' && r.date && new Date(r.date).getMonth() === m && new Date(r.date).getFullYear() === y).length;
+    let n = currentDate;
+    let m = n.getMonth(), y = n.getFullYear();
+    
+    // Фильтруем записи по периоду
+    let periodRecords;
+    let periodLabel;
+    
+    if (currentPeriod === 'day') {
+        let dateStr = n.toISOString().slice(0, 10);
+        periodRecords = data.records.filter(r => r.status === 'completed' && r.date === dateStr);
+        periodLabel = n.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+    } else if (currentPeriod === 'month') {
+        periodRecords = data.records.filter(r => r.status === 'completed' && r.date && new Date(r.date).getMonth() === m && new Date(r.date).getFullYear() === y);
+        periodLabel = n.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+    } else {
+        periodRecords = data.records.filter(r => r.status === 'completed' && r.date && new Date(r.date).getFullYear() === y);
+        periodLabel = n.getFullYear().toString();
+    }
+    
+    let rev = periodRecords.reduce((s, r) => s + (r.price || 0), 0);
+    
+    let exp;
+    if (currentPeriod === 'day') {
+        exp = data.expenses.filter(e => e.date === n.toISOString().slice(0, 10)).reduce((s, e) => s + e.amount, 0);
+    } else if (currentPeriod === 'month') {
+        exp = monthExp(m, y);
+    } else {
+        exp = monthExp(0, y); // все месяцы года
+    }
+    
+    let canc;
+    if (currentPeriod === 'day') {
+        canc = data.records.filter(r => r.status === 'cancelled' && r.date === n.toISOString().slice(0, 10)).length;
+    } else if (currentPeriod === 'month') {
+        canc = data.records.filter(r => r.status === 'cancelled' && r.date && new Date(r.date).getMonth() === m && new Date(r.date).getFullYear() === y).length;
+    } else {
+        canc = data.records.filter(r => r.status === 'cancelled' && r.date && new Date(r.date).getFullYear() === y).length;
+    }
+    
     let act = data.records.filter(r => r.status === 'active').length;
-    let avg = mr.length ? Math.round(rev / mr.length) : 0;
-    let ss = {}; mr.forEach(r => { if (r.service) ss[r.service] = (ss[r.service] || 0) + 1; });
+    let avg = periodRecords.length ? Math.round(rev / periodRecords.length) : 0;
+    let ss = {}; periodRecords.forEach(r => { if (r.service) ss[r.service] = (ss[r.service] || 0) + 1; });
     let top = Object.entries(ss).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
+
+    // Обновляем заголовок периода
+    let periodLabelEl = document.getElementById('periodLabel');
+    if (periodLabelEl) periodLabelEl.innerText = periodLabel;
 
     // Календарь
     let today = todayStr();
@@ -46,7 +103,7 @@ export function renderDashboard() {
     // Виджеты
     document.getElementById('statTotalClients').innerText = data.clients.length;
     document.getElementById('statActive').innerText = act;
-    document.getElementById('statCompleted').innerText = mr.length;
+    document.getElementById('statCompleted').innerText = periodRecords.length;
     document.getElementById('statCancelled').innerText = canc;
     document.getElementById('statRevenue').innerText = rev + '₽';
     document.getElementById('statCost').innerText = exp + '₽';

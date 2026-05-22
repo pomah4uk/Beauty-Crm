@@ -59,8 +59,9 @@ export function updateLastVisit(id) {
     }
 }
 
-export function monthExp() {
-    let n = new Date(), m = n.getMonth(), y = n.getFullYear();
+export function monthExp(month, year) {
+    let m = month !== undefined ? month : new Date().getMonth();
+    let y = year !== undefined ? year : new Date().getFullYear();
     return data.expenses
         .filter(e => {
             let d = new Date(e.date);

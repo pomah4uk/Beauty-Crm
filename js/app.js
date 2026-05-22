@@ -1,7 +1,7 @@
 // ===== ТОЧКА ВХОДА =====
 
 import { setPage } from './router.js';
-import { renderHistory, renderServices } from './render.js';
+import { renderHistory, renderServices, setPeriod, shiftPeriod } from './render.js';
 import {
     openClientModal, openRecordModal, openExpenseModal,
     openServiceModal, editService, showClientStats,
@@ -69,6 +69,15 @@ document.getElementById('historySearch').oninput = function() { renderHistory();
 document.querySelectorAll('input[name="histFilter"]').forEach(r => {
     r.onchange = function() { renderHistory(); };
 });
+
+// ===== ПЕРИОД =====
+document.querySelectorAll('.period-tab').forEach(tab => {
+    tab.onclick = function() {
+        setPeriod(this.dataset.period);
+    };
+});
+document.getElementById('periodPrev').onclick = function() { shiftPeriod(-1); };
+document.getElementById('periodNext').onclick = function() { shiftPeriod(1); };
 
 // ===== ДАВНО НЕ ЗАХОДИЛИ =====
 document.getElementById('inactiveTitle').onclick = function(e) {

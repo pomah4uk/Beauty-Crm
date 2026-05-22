@@ -22,8 +22,7 @@
     <div class="flex gap12 mb12">
         <button id="addRecordBtn" class="btn btn-success">📝 Запись клиента</button>
         <button id="addExpenseBtn" class="btn btn-orange">➕ Расход</button>
-    </div>
-
+    </div>    
     <!-- КАЛЕНДАРЬ -->
     <div class="report-block mb12" id="todayBlock">
         <h3 class="mb12">📅 Сегодня (<span id="todayDate"></span>)</h3>
@@ -33,7 +32,19 @@
         <h3 class="mb12">📅 Завтра (<span id="tomorrowDate"></span>)</h3>
         <div id="tomorrowList"></div>
     </div>
-
+    <!-- ПЕРИОД -->
+    <div class="report-block mb12">
+        <div class="flex gap12 mb12" id="periodTabs">
+            <button class="small-btn period-tab active" data-period="day">📅 День</button>
+            <button class="small-btn period-tab" data-period="month">📆 Месяц</button>
+            <button class="small-btn period-tab" data-period="year">📊 Год</button>
+        </div>
+        <div class="flex gap12" style="align-items:center">
+            <span id="periodLabel" style="font-weight:600;white-space:nowrap">Май 2026</span>
+            <button class="small-btn" id="periodPrev">◀</button>
+            <button class="small-btn" id="periodNext">▶</button>
+        </div>
+    </div>
     <div class="dash-stats">
         <div class="dash-stat" data-nav="clients"><div class="dash-stat-label">👥 Всего клиентов</div><div class="dash-stat-value" id="statTotalClients">0</div></div>
         <div class="dash-stat"><div class="dash-stat-label">💰 Средний чек</div><div class="dash-stat-value" id="statAvgCheck">0₽</div></div>
