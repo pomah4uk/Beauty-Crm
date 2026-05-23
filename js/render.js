@@ -1,7 +1,7 @@
 // ===== РЕНДЕРЫ СТРАНИЦ =====
 
 import { data, clientName, clientPhone, todayStr, daysSince, updateLastVisit, monthExp, save, getServiceColor } from './data.js';
-import { toast, copyPhone, callPhone } from './utils.js';
+import { toast, copyPhone, callPhone, confirmModal } from './utils.js';
 
 // ===== ПЕРИОД =====
 let currentPeriod = 'month';
@@ -89,9 +89,9 @@ export function renderDashboard() {
                 let p = clientPhone(r.clientId);
                 let color = getServiceColor(r.service?.split(' + ')[0]);
                 dayTotal += r.price || 0;
-                h += `<div class="card swipe-card pad12 mb8" style="cursor:default;border-left:4px solid ${color}" data-id="${r.id}">
+                h += `<div class="card swipe-card pad12 mb8" style="cursor:pointer;border-left:4px solid ${color}" data-id="${r.id}" onclick="window.editRecord(${r.id})">
                     <div class="flex between mb8"><span class="card-name">${clientName(r.clientId)}</span><span style="font-size:.85rem;color:#666">${r.time||'12:00'} — ${r.service||'—'}</span></div>
-                    <div class="flex end gap12">${p?`<button class="call-btn" onclick="window.callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="window.editRecord(${r.id})" style="background:#f39c12;color:#fff">✏️</button></div></div>`;
+                    <div class="flex end gap12">${p?`<button class="call-btn" onclick="event.stopPropagation();window.callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="event.stopPropagation();window.editRecord(${r.id})" style="background:#f39c12;color:#fff">✏️</button></div></div>`;
             });
         }
         document.getElementById(elId).innerHTML = h;
@@ -173,7 +173,7 @@ function addSwipeListeners(elId) {
             }
         }, { passive: false });
 
-        card.addEventListener('touchend', function() {
+        card.addEventListener('touchend', async function() {
             let diff = currentX - startX;
             card.style.transition = 'transform 0.2s ease';
             card.style.transform = '';
@@ -184,15 +184,15 @@ function addSwipeListeners(elId) {
 
             let id = parseInt(card.dataset.id);
             if (diff > 0) {
-                if (confirm('✅ Подтвердить выполнение?')) {
-                    window.completeRecord(id);
-                }
+                let ok = await confirmModal('✅ Подтвердить выполнение?');
+                if (ok) window.completeRecord(id);
             } else {
-                window.cancelRecord(id); // внутри уже есть confirm
+                window.cancelRecord(id);
             }
         });
     });
 }
+
 // ===== КЛИЕНТЫ =====
 export function renderClients() {
     let s = document.getElementById('clientSearch').value.toLowerCase();
@@ -214,7 +214,7 @@ export function renderActive() {
     data.records.filter(r => r.status === 'active' && clientName(r.clientId).toLowerCase().includes(s)).forEach(r => {
         let p = clientPhone(r.clientId);
         let color = getServiceColor(r.service?.split(' + ')[0]);
-        h += `<div class="card swipe-card pad12 mb8" style="border-left:4px solid ${color}" data-id="${r.id}">
+        h += `<div class="card swipe-card pad12 mb8" style="cursor:pointer;border-left:4px solid ${color}" data-id="${r.id}" onclick="window.editRecord(${r.id})">
             <div class="flex between mb8"><span class="card-name">${clientName(r.clientId)}</span><span style="font-size:.85rem;color:#666">${r.time||'12:00'} — ${r.service||'—'}</span></div>
             <div class="flex end gap12">${p?`<button class="call-btn" onclick="event.stopPropagation();window.callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="event.stopPropagation();window.editRecord(${r.id})" style="background:#f39c12;color:#fff">✏️</button></div></div>`;
     });

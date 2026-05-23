@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="CRM Мастер">
     <meta name="theme-color" content="#f1f2f6">
-    <link rel="stylesheet" href="css/style.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=3">
     <title>CRM Мастер</title>
 </head>
 <body>
@@ -202,11 +202,19 @@
     </div>
 </div>
 
+<!-- МОДАЛКА УВЕДОМЛЕНИЙ -->
+<div id="alertModal" class="modal">
+    <div class="modal-content" style="text-align:center">
+        <p id="alertMessage" style="margin-bottom:16px;font-size:1rem"></p>
+        <div id="alertButtons" class="modal-buttons"></div>
+    </div>
+</div>
+
 <!-- КНОПКА НАЗАД -->
 <div class="nav-back" id="navBack" style="display:none">
     <button class="btn" onclick="window.goHome()">← Назад</button>
 </div>
 
-<script type="module" src="js/app.js?v=2"></script>
+<script type="module" src="js/app.js?v=3"></script>
 </body>
 </html>

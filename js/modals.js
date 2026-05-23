@@ -1,8 +1,7 @@
 // ===== МОДАЛКИ =====
 
 import { data, nextId, clientPhone, todayStr, updateLastVisit, save } from './data.js';
-import { toast, show, hide, copyPhone, callPhone } from './utils.js';
-import { setPage } from './router.js';
+import { toast, show, hide, copyPhone, callPhone, alertModal, confirmModal } from './utils.js';
 import { renderHistory, renderServices } from './render.js';
 
 let editClientId = null;
@@ -14,8 +13,6 @@ window.editClientId = null;
 window.editServiceId = null;
 window.statsClientId = null;
 window.editRecordId = null;
-
-const COLORS = ['#e74c3c','#f39c12','#3498db','#27ae60','#9b59b6','#1abc9c','#e67e22','#95a5a6'];
 
 // ===== МОДАЛКА КЛИЕНТА =====
 export function openClientModal() {
@@ -29,7 +26,7 @@ export function openClientModal() {
 
 document.getElementById('saveClientBtn').onclick = function() {
     let name = document.getElementById('clientName').value.trim();
-    if (!name) return alert('Введите имя');
+    if (!name) { alertModal('Введите имя'); return; }
     let c = {
         id: editClientId || nextId(data.clients),
         name,
@@ -159,7 +156,7 @@ document.getElementById('saveRecordBtn').onclick = function() {
 
     if (v === '__new__') {
         let n = document.getElementById('newClientName').value.trim();
-        if (!n) return alert('Введите имя');
+        if (!n) { alertModal('Введите имя'); return; }
         let c = {
             id: nextId(data.clients),
             name: n,
@@ -172,16 +169,19 @@ document.getElementById('saveRecordBtn').onclick = function() {
         cid = c.id;
     } else {
         cid = parseInt(v);
-        if (!cid) return alert('Выберите клиента');
+        if (!cid) { alertModal('Выберите клиента'); return; }
     }
 
-    if (document.getElementById('recordDate').value < todayStr()) return alert('Нельзя задним числом!');
+    if (document.getElementById('recordDate').value < todayStr()) {
+        alertModal('Нельзя установить дату задним числом!');
+        return;
+    }
 
     let names = [];
     document.querySelectorAll('#servicesContainer select').forEach(s => {
         if (s.value) names.push(s.value);
     });
-    if (!names.length) return alert('Выберите услугу');
+    if (!names.length) { alertModal('Выберите услугу'); return; }
 
     let timeVal = document.getElementById('recordTime').value || '12:00';
     let r = {
@@ -255,8 +255,9 @@ export function completeRecord(id) {
     }
 }
 
-export function cancelRecord(id) {
-    if (confirm('Отменить?')) {
+export async function cancelRecord(id) {
+    let ok = await confirmModal('Отменить запись?');
+    if (ok) {
         let r = data.records.find(x => x.id === id);
         if (r) {
             r.status = 'cancelled';
@@ -276,7 +277,7 @@ export function openExpenseModal() {
 
 document.getElementById('saveExpenseBtn').onclick = function() {
     let a = parseInt(document.getElementById('expenseAmount').value);
-    if (!a || a <= 0) return alert('Введите сумму');
+    if (!a || a <= 0) { alertModal('Введите сумму'); return; }
     data.expenses.push({
         id: nextId(data.expenses),
         amount: a,
@@ -315,7 +316,7 @@ export function editService(id) {
 
 document.getElementById('saveServiceBtn').onclick = function() {
     let n = document.getElementById('serviceName').value.trim();
-    if (!n) return alert('Введите название');
+    if (!n) { alertModal('Введите название'); return; }
     let s = {
         id: editServiceId || nextId(data.services),
         name: n,
@@ -337,22 +338,25 @@ document.getElementById('cancelServiceBtn').onclick = function() {
 };
 
 // ===== УДАЛЕНИЕ =====
-export function deleteRecord(id) {
-    if (confirm('Удалить запись?')) {
+export async function deleteRecord(id) {
+    let ok = await confirmModal('Удалить запись?');
+    if (ok) {
         data.records = data.records.filter(r => r.id !== id);
         save();
     }
 }
 
-export function deleteExpense(id) {
-    if (confirm('Удалить расход?')) {
+export async function deleteExpense(id) {
+    let ok = await confirmModal('Удалить расход?');
+    if (ok) {
         data.expenses = data.expenses.filter(e => e.id !== id);
         save();
     }
 }
 
-export function deleteService(id) {
-    if (confirm('Удалить услугу?')) {
+export async function deleteService(id) {
+    let ok = await confirmModal('Удалить услугу?');
+    if (ok) {
         data.services = data.services.filter(s => s.id !== id);
         save();
     }
@@ -411,9 +415,10 @@ document.getElementById('editClientFromStatsBtn').onclick = function() {
     show('clientModal');
 };
 
-document.getElementById('deleteClientFromStatsBtn').onclick = function() {
+document.getElementById('deleteClientFromStatsBtn').onclick = async function() {
     if (!statsClientId) return;
-    if (confirm('Удалить клиента и все записи?')) {
+    let ok = await confirmModal('Удалить клиента и все записи?');
+    if (ok) {
         data.clients = data.clients.filter(x => x.id !== statsClientId);
         data.records = data.records.filter(r => r.clientId !== statsClientId);
         statsClientId = null;
@@ -469,14 +474,15 @@ export function importData(file) {
     r.readAsText(file);
 }
 
-export function resetData() {
-    if (confirm('Удалить всё?')) {
+export async function resetData() {
+    let ok = await confirmModal('Удалить все данные? Это необратимо.');
+    if (ok) {
         data.clients = [];
         data.records = [];
         data.expenses = [];
         data.services = [{ id: 1, name: 'Консультация', price: 0, color: '#3498db' }];
         data.inactiveDays = 30;
         save();
-        toast('🗑️ Удалено');
+        toast('🗑️ Данные удалены');
     }
 }
