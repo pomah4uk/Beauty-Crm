@@ -1,5 +1,8 @@
 // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
 
+export let modalActive = false;
+let currentModalResolve = null;
+
 export function toast(msg) {
     let t = document.createElement('div');
     t.className = 'toast';
@@ -22,26 +25,35 @@ export function callPhone(p) {
     window.open('tel:' + p, '_self');
 }
 
-// Кастомный alert
 export function alertModal(msg) {
+    if (modalActive) return;
+    modalActive = true;
+    
     let msgEl = document.getElementById('alertMessage');
     let modal = document.getElementById('alertModal');
-    if (!msgEl || !modal) { alert(msg); return; }
+    if (!msgEl || !modal) { modalActive = false; alert(msg); return; }
+    
     msgEl.innerText = msg;
     let buttons = document.getElementById('alertButtons');
     buttons.innerHTML = `<button class="btn btn-primary" id="alertOkBtn" style="margin:0">OK</button>`;
     modal.style.display = 'flex';
+    
     document.getElementById('alertOkBtn').onclick = function() {
         modal.style.display = 'none';
+        modalActive = false;
     };
 }
 
-// Кастомный confirm (возвращает Promise)
 export function confirmModal(msg) {
     return new Promise((resolve) => {
+        if (modalActive) { resolve(false); return; }
+        modalActive = true;
+        currentModalResolve = resolve;
+        
         let msgEl = document.getElementById('alertMessage');
         let modal = document.getElementById('alertModal');
-        if (!msgEl || !modal) { resolve(confirm(msg)); return; }
+        if (!msgEl || !modal) { modalActive = false; currentModalResolve = null; resolve(confirm(msg)); return; }
+        
         msgEl.innerText = msg;
         let buttons = document.getElementById('alertButtons');
         buttons.innerHTML = `
@@ -49,12 +61,17 @@ export function confirmModal(msg) {
             <button class="btn btn-primary" id="alertOkBtn" style="margin:0">Да</button>
         `;
         modal.style.display = 'flex';
+        
         document.getElementById('alertOkBtn').onclick = function() {
             modal.style.display = 'none';
+            modalActive = false;
+            currentModalResolve = null;
             resolve(true);
         };
         document.getElementById('alertCancelBtn').onclick = function() {
             modal.style.display = 'none';
+            modalActive = false;
+            currentModalResolve = null;
             resolve(false);
         };
     });
@@ -64,8 +81,13 @@ export function confirmModal(msg) {
 let alertModalEl = document.getElementById('alertModal');
 if (alertModalEl) {
     alertModalEl.addEventListener('click', function(e) {
-        if (e.target === this) {
+        if (e.target === this && modalActive) {
             this.style.display = 'none';
+            modalActive = false;
+            if (currentModalResolve) {
+                currentModalResolve(false);
+                currentModalResolve = null;
+            }
         }
     });
 }

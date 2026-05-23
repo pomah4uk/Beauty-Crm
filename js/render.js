@@ -207,6 +207,9 @@ function addSwipeListeners(elId) {
         }, { passive: false });
 
         card.addEventListener('touchend', async function() {
+            // Если модалка уже открыта — игнорируем
+            if (window._modalActive) return;
+            
             let diff = currentX - startX;
             card.style.transition = 'transform 0.2s ease';
             card.style.transform = '';
@@ -247,7 +250,7 @@ function addSwipeListeners(elId) {
                         window.showClientStats(id);
                         setTimeout(() => {
                             document.getElementById('createRecordForClientBtn')?.click();
-                        }, 300);
+                        }, 500);
                     }
                 } else if (type === 'inactive') {
                     let ok = await confirmModal('📝 Создать запись для этого клиента?');
@@ -255,7 +258,7 @@ function addSwipeListeners(elId) {
                         window.showClientStats(id);
                         setTimeout(() => {
                             document.getElementById('createRecordForClientBtn')?.click();
-                        }, 300);
+                        }, 500);
                     }
                 } else if (type === 'expense') {
                     let ok = await confirmModal('🗑️ Удалить расход?');

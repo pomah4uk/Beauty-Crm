@@ -2,19 +2,12 @@
 
 import { data, nextId, clientPhone, todayStr, updateLastVisit, save } from './data.js';
 import { toast, show, hide, callPhone, alertModal, confirmModal } from './utils.js';
-import { renderHistory, renderServices } from './render.js';
 
 let editClientId = null;
 let editServiceId = null;
 let statsClientId = null;
 let editRecordId = null;
 let editExpenseId = null;
-
-window.editClientId = null;
-window.editServiceId = null;
-window.statsClientId = null;
-window.editRecordId = null;
-window.editExpenseId = null;
 
 // ===== МОДАЛКА КЛИЕНТА =====
 export function openClientModal() {
@@ -362,29 +355,20 @@ document.getElementById('cancelServiceBtn').onclick = function() {
     hide('serviceModal');
 };
 
-// ===== УДАЛЕНИЕ =====
-export async function deleteRecord(id) {
-    let ok = await confirmModal('Удалить запись?');
-    if (ok) {
-        data.records = data.records.filter(r => r.id !== id);
-        save();
-    }
+// ===== УДАЛЕНИЕ (без confirm — он уже в свайпе) =====
+export function deleteRecord(id) {
+    data.records = data.records.filter(r => r.id !== id);
+    save();
 }
 
-export async function deleteExpense(id) {
-    let ok = await confirmModal('Удалить расход?');
-    if (ok) {
-        data.expenses = data.expenses.filter(e => e.id !== id);
-        save();
-    }
+export function deleteExpense(id) {
+    data.expenses = data.expenses.filter(e => e.id !== id);
+    save();
 }
 
-export async function deleteService(id) {
-    let ok = await confirmModal('Удалить услугу?');
-    if (ok) {
-        data.services = data.services.filter(s => s.id !== id);
-        save();
-    }
+export function deleteService(id) {
+    data.services = data.services.filter(s => s.id !== id);
+    save();
 }
 
 // ===== СТАТИСТИКА КЛИЕНТА =====
