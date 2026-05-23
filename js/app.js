@@ -1,16 +1,16 @@
 // ===== ТОЧКА ВХОДА =====
 
-import { setPage, setOnPageChange } from './router.js';
-import { renderHistory, renderServices, setPeriod, shiftPeriod } from './render.js';
+import { setPage, setOnPageChange } from './router.js?v=2';
+import { renderHistory, renderServices, setPeriod, shiftPeriod } from './render.js?v=2';
 import {
     openClientModal, openRecordModal, openExpenseModal,
     openServiceModal, editService, showClientStats,
     editRecord, completeRecord, cancelRecord,
     deleteRecord, deleteExpense, deleteService,
     openInactiveModal, exportData, importData, resetData
-} from './modals.js';
-import { copyPhone, callPhone } from './utils.js';
-import { initTheme } from './theme.js';
+} from './modals.js?v=2';
+import { copyPhone, callPhone } from './utils.js?v=2';
+import { initTheme } from './theme.js?v=2';
 
 // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
 window.copyPhone = copyPhone;
