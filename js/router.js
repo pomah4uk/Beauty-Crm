@@ -1,10 +1,13 @@
 // ===== НАВИГАЦИЯ =====
 
+import { renderDashboard, setPeriod, shiftPeriod } from './render/dashboard.js';
+import { renderClients } from './render/clients.js';
+import { renderActive } from './render/records.js';
+import { renderHistory } from './render/history.js';
+import { renderExpenses } from './render/expenses.js';
+import { renderServices } from './render/services.js';
+import { renderStats } from './render/stats.js';
 import { onDataChange } from './data.js';
-import {
-    renderDashboard, renderClients, renderActive,
-    renderHistory, renderExpenses, renderServices
-} from './render.js';
 
 export let currentPage = 'dashboard';
 
@@ -13,6 +16,7 @@ const titles = {
     clients: 'Клиенты',
     records: 'Активные записи',
     history: 'История',
+    stats: 'Статистика',
     expenses: 'Расходы',
     services: 'Услуги',
     backup: 'Бэкап'
@@ -33,6 +37,7 @@ function renderCurrentPage() {
         case 'clients':   renderClients(); break;
         case 'records':   renderActive(); break;
         case 'history':   renderHistory(); break;
+        case 'stats':     renderStats(); break;
         case 'expenses':  renderExpenses(); break;
         case 'services':  renderServices(); break;
     }
@@ -41,7 +46,7 @@ function renderCurrentPage() {
 export function setPage(p) {
     currentPage = p;
 
-    ['Dashboard', 'Clients', 'Records', 'History', 'Expenses', 'Services', 'Backup'].forEach(name => {
+    ['Dashboard', 'Clients', 'Records', 'History', 'Stats', 'Expenses', 'Services', 'Backup'].forEach(name => {
         let el = document.getElementById('page' + name);
         if (el) el.style.display = (p === name.toLowerCase()) ? 'block' : 'none';
     });

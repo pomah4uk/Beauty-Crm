@@ -8,7 +8,6 @@
     <meta name="apple-mobile-web-app-title" content="CRM Мастер">
     <meta name="theme-color" content="#f1f2f6">
     <link rel="stylesheet" href="css/style.css?v=6">
-    <script type="module" src="js/app.js?v=6"></script>
     <title>CRM Мастер</title>
 </head>
 <body>
@@ -16,13 +15,13 @@
 <div class="header">
     <h1 id="pageTitle">Главная</h1>
     <button class="theme-switch" id="themeBtn">🌙</button>
+    <button class="header-icon" id="backupHeaderBtn" title="Бэкап">💾</button>
 </div>
-
 <!-- ГЛАВНАЯ -->
 <div id="pageDashboard">
     <div class="flex gap12 mb12">
-        <button id="addRecordBtn" class="btn btn-success" style="flex:1">📝 Запись</button>
-        <button id="addExpenseBtn" class="btn btn-orange" style="width:48px;flex-shrink:0;border-radius:14px;font-size:1.2rem">₽</button>
+        <button id="addRecordBtn" class="btn btn-success">📝 Запись</button>
+        <button id="addExpenseBtn" class="btn btn-orange" style="width:48px;flex-shrink:0;border-radius:14px;font-size:1.2rem">-₽</button>
     </div>
 
     <!-- КАЛЕНДАРЬ -->
@@ -40,12 +39,12 @@
     <!-- ПЕРИОД -->
     <div class="report-block mb12">
         <div class="flex gap12 mb12" id="periodTabs">
-            <button class="small-btn period-tab active" data-period="day">📅 День</button>
-            <button class="small-btn period-tab" data-period="month">📆 Месяц</button>
+            <button class="small-btn period-tab active" data-period="month">📆 Месяц</button>
+            <button class="small-btn period-tab" data-period="day">📅 День</button>
             <button class="small-btn period-tab" data-period="year">📊 Год</button>
         </div>
         <div class="flex gap12" style="align-items:center">
-            <span id="periodLabel" style="font-weight:600;white-space:nowrap">Май 2026</span>
+            <span id="periodLabel" style="font-weight:600;white-space:nowrap"></span>
             <button class="small-btn" id="periodPrev">◀</button>
             <button class="small-btn" id="periodNext">▶</button>
         </div>
@@ -64,14 +63,13 @@
     <div class="dash-stats">
         <div class="dash-stat"><div class="dash-stat-label">💰 Выручка</div><div class="dash-stat-value" id="statRevenue">0₽</div></div>
         <div class="dash-stat" data-nav="expenses"><div class="dash-stat-label">💸 Затраты</div><div class="dash-stat-value" id="statCost">0₽</div></div>
-        <div class="dash-stat"><div class="dash-stat-label">📈 Прибыль</div><div class="dash-stat-value" id="statProfit">0₽</div></div>
+        <div class="dash-stat" data-nav="stats"><div class="dash-stat-label">📈 Прибыль</div><div class="dash-stat-value" id="statProfit">0₽</div></div>
     </div>
 
     <div class="report-block">
-        <h3 class="mb12" id="inactiveTitle" style="cursor:pointer">⏰ Давно не заходили (>&nbsp;<span id="inactiveDaysLabel">30</span>&nbsp;дней) ⚙️</h3>
+        <h3 class="mb12" id="inactiveTitle" style="cursor:pointer">⏰ Были больше <span id="inactiveDaysLabel">30</span>&nbsp;дней назад: ⚙️</h3>
         <div id="inactiveList"></div>
     </div>
-    <div class="bottom-link"><a id="backupLink">💾 Бэкап</a></div>
 </div>
 
 <!-- КЛИЕНТЫ -->
@@ -97,6 +95,34 @@
         <label><input type="radio" name="histFilter" value="cancelled"> Отменённые</label>
     </div>
     <div id="historyList"></div>
+</div>
+
+<!-- СТАТИСТИКА -->
+<div id="pageStats" class="hidden">
+    <div class="report-block mb12">
+        <div class="flex gap12 mb12" id="statsPeriodTabs">
+            <button class="small-btn period-tab active" data-period="month">📆 Месяц</button>
+            <button class="small-btn period-tab" data-period="day">📅 День</button>
+            <button class="small-btn period-tab" data-period="year">📊 Год</button>
+        </div>
+        <div class="flex gap12" style="align-items:center">
+            <span id="statsPeriodLabel" style="font-weight:600;white-space:nowrap">Май 2026</span>
+            <button class="small-btn" id="statsPeriodPrev">◀</button>
+            <button class="small-btn" id="statsPeriodNext">▶</button>
+        </div>
+    </div>
+    <div class="report-block">
+        <div class="card-row"><span>💰 Выручка</span><span id="statsRevenue">0₽</span></div>
+        <div class="card-row"><span>💸 Затраты</span><span id="statsCost">0₽</span></div>
+        <div class="card-row" style="font-weight:700"><span>📈 Прибыль</span><span id="statsProfit">0₽</span></div>
+        <div class="card-row"><span>📊 Средний чек</span><span id="statsAvg">0₽</span></div>
+        <div class="card-row"><span>✅ Выполнено</span><span id="statsCompleted">0</span></div>
+        <div class="card-row"><span>❌ Отменено</span><span id="statsCancelled">0</span></div>
+    </div>
+    <div class="report-block">
+        <h3 class="mb12">🏆 Топ услуг</h3>
+        <div id="statsTopServices"></div>
+    </div>
 </div>
 
 <!-- РАСХОДЫ -->
@@ -173,7 +199,7 @@
         <label class="modal-label">Название</label><input class="modal-input" id="serviceName" placeholder="Например: Стрижка">
         <label class="modal-label">Цена по умолчанию</label><input type="number" class="modal-input" id="servicePrice" placeholder="0">
         <label class="modal-label">Цвет</label>
-        <div class="flex gap12 mb12" id="colorPicker">
+        <div class="flex gap12 mb12">
             <input type="color" class="modal-input" id="serviceColor" value="#3498db" style="width:48px;height:48px;padding:0;border:none;cursor:pointer">
         </div>
         <div class="modal-buttons"><button id="cancelServiceBtn">Отмена</button><button id="saveServiceBtn">Сохранить</button></div>
@@ -190,6 +216,14 @@
     </div>
 </div>
 
+<!-- МОДАЛКА УВЕДОМЛЕНИЙ -->
+<div id="alertModal" class="modal">
+    <div class="modal-content" style="text-align:center">
+        <p id="alertMessage" style="margin-bottom:16px;font-size:1rem"></p>
+        <div id="alertButtons" class="modal-buttons"></div>
+    </div>
+</div>
+
 <!-- МОДАЛКА СТАТИСТИКИ -->
 <div id="clientStatsModal" class="modal">
     <div class="modal-content">
@@ -203,17 +237,11 @@
     </div>
 </div>
 
-<!-- МОДАЛКА УВЕДОМЛЕНИЙ -->
-<div id="alertModal" class="modal">
-    <div class="modal-content" style="text-align:center">
-        <p id="alertMessage" style="margin-bottom:16px;font-size:1rem"></p>
-        <div id="alertButtons" class="modal-buttons"></div>
-    </div>
-</div>
-
 <!-- КНОПКА НАЗАД -->
 <div class="nav-back" id="navBack" style="display:none">
     <button class="btn" onclick="window.goHome()">← Назад</button>
 </div>
+
+<script type="module" src="js/app.js?v=6"></script>
 </body>
 </html>

@@ -1,19 +1,19 @@
 // ===== ТОЧКА ВХОДА =====
 
-import { setPage, setOnPageChange } from './router.js?v=6';
-import { renderHistory, renderServices, setPeriod, shiftPeriod } from './render.js?v=6';
+import { setPage, setOnPageChange } from './router.js?v=7';
+import { renderHistory } from './render/history.js';
+import { renderServices } from './render/services.js';
+import { setPeriod, shiftPeriod } from './render/dashboard.js';
+import { setStatsPeriod, shiftStatsPeriod } from './render/stats.js';
 import {
     openClientModal, openRecordModal, openExpenseModal, editExpense,
     openServiceModal, editService, showClientStats,
     editRecord, completeRecord, cancelRecord,
     deleteRecord, deleteExpense, deleteService,
     openInactiveModal, exportData, importData, resetData
-} from './modals.js?v=6';
-import { callPhone } from './utils.js?v=6';
-import { initTheme } from './theme.js?v=6';
-
-
-window.openRecordModal = openRecordModal;
+} from './modals.js?v=7';
+import { callPhone } from './utils.js?v=7';
+import { initTheme } from './theme.js?v=7';
 
 // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
 window.callPhone = callPhone;
@@ -26,6 +26,7 @@ window.cancelRecord = cancelRecord;
 window.deleteRecord = deleteRecord;
 window.deleteExpense = deleteExpense;
 window.deleteService = deleteService;
+window.openRecordModal = openRecordModal;
 
 // ===== КНОПКИ =====
 document.getElementById('addRecordBtn').onclick = function() { openRecordModal(null); };
@@ -36,7 +37,7 @@ document.getElementById('addExpenseBtn2').onclick = openExpenseModal;
 document.getElementById('addServiceBtn').onclick = openServiceModal;
 
 // ===== ВИДЖЕТЫ =====
-document.querySelectorAll('.dash-stat[data-nav]').forEach(el => {
+document.querySelectorAll('#pageDashboard .dash-stat[data-nav]').forEach(el => {
     el.onclick = function() {
         let n = this.dataset.nav;
         if (n === 'clients') setPage('clients');
@@ -57,6 +58,7 @@ document.querySelectorAll('.dash-stat[data-nav]').forEach(el => {
         }
         else if (n === 'expenses') setPage('expenses');
         else if (n === 'services') setPage('services');
+        else if (n === 'stats') setPage('stats');
     };
 });
 
@@ -68,12 +70,19 @@ document.querySelectorAll('input[name="histFilter"]').forEach(r => {
     r.onchange = function() { renderHistory(); };
 });
 
-// ===== ПЕРИОД =====
-document.querySelectorAll('.period-tab').forEach(tab => {
+// ===== ПЕРИОД НА ГЛАВНОЙ =====
+document.querySelectorAll('#periodTabs .period-tab').forEach(tab => {
     tab.onclick = function() { setPeriod(this.dataset.period); };
 });
 document.getElementById('periodPrev').onclick = function() { shiftPeriod(-1); };
 document.getElementById('periodNext').onclick = function() { shiftPeriod(1); };
+
+// ===== ПЕРИОД НА СТАТИСТИКЕ =====
+document.querySelectorAll('#statsPeriodTabs .period-tab').forEach(tab => {
+    tab.onclick = function() { setStatsPeriod(this.dataset.period); };
+});
+document.getElementById('statsPeriodPrev').onclick = function() { shiftStatsPeriod(-1); };
+document.getElementById('statsPeriodNext').onclick = function() { shiftStatsPeriod(1); };
 
 // ===== ДАВНО НЕ ЗАХОДИЛИ =====
 document.getElementById('inactiveTitle').onclick = function(e) {
@@ -82,14 +91,23 @@ document.getElementById('inactiveTitle').onclick = function(e) {
 };
 
 // ===== БЭКАП =====
-document.getElementById('backupLink').onclick = function() { setPage('backup'); };
+document.getElementById('backupHeaderBtn').onclick = function() {
+    setPage('backup');
+};
 document.getElementById('exportBtn').onclick = exportData;
-document.getElementById('importBtn').onclick = function() { document.getElementById('importFile').click(); };
+document.getElementById('importBtn').onclick = function() {
+    document.getElementById('importFile').click();
+};
 document.getElementById('importFile').onchange = function(e) {
     let f = e.target.files[0];
-    if (f) { importData(f); e.target.value = ''; }
+    if (f) {
+        importData(f);
+        e.target.value = '';
+    }
 };
-document.getElementById('resetBtn').onclick = function() { resetData(); };
+document.getElementById('resetBtn').onclick = function() {
+    resetData();
+};
 
 // ===== ЗАКРЫТИЕ МОДАЛОК =====
 document.querySelectorAll('.modal').forEach(modal => {
@@ -109,7 +127,6 @@ function updateNavBack(page) {
 }
 setOnPageChange(updateNavBack);
 
-// ===== КНОПКА ДОМОЙ =====
 window.goHome = function() {
     setPage('dashboard');
 };

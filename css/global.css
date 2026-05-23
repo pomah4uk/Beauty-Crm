@@ -1,0 +1,51 @@
+/* ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===== */
+:root {
+    --bg: #f1f2f6;
+    --card: #fff;
+    --text: #1e272e;
+    --sub: #555;
+    --br: 14px;
+    --pad: 12px;
+}
+body.dark {
+    --bg: #1e272e;
+    --card: #2f3a42;
+    --text: #d2dae2;
+    --sub: #aaa;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+}
+input, textarea, select, [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+body {
+    font-family: system-ui;
+    background: var(--bg);
+    color: var(--text);
+    padding: 12px 12px 80px;
+    transition: .3s;
+}
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+.flex { display: flex; gap: 8px; }
+.wrap { flex-wrap: wrap; }
+.between { justify-content: space-between; }
+.end { justify-content: flex-end; }
+.mb8 { margin-bottom: 8px; }
+.mb12 { margin-bottom: 12px; }
+.mb16 { margin-bottom: 16px; }
+.mb20 { margin-bottom: 20px; }
+.mt12 { margin-top: 12px; }
+.mt14 { margin-top: 14px; }
+.mt20 { margin-top: 20px; }
+.gap12 { gap: 12px; }
+.hidden { display: none; }

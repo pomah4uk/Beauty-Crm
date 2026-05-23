@@ -1,0 +1,27 @@
+/* ===== ВИДЖЕТЫ ===== */
+.dash-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.dash-stat {
+    flex: 1;
+    min-width: 90px;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 12px 6px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: transform .1s;
+}
+.dash-stat:active { transform: scale(.95); }
+.dash-stat-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+.dash-stat-label {
+    font-size: .7rem;
+    color: #7f8c8d;
+}

@@ -1,0 +1,35 @@
+/* ===== ШАПКА И НАВИГАЦИЯ ===== */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+.header h1 { flex: 1; }
+.theme-switch {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-right: 15px;
+}
+.header-icon {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-right: 4px;
+}
+.bottom-link {
+    text-align: center;
+    margin-top: 20px;
+    padding: var(--pad);
+    border-top: 1px solid #e0e4e8;
+}
+.bottom-link a {
+    color: #3498db;
+    text-decoration: none;
+    cursor: pointer;
+}
