@@ -20,6 +20,10 @@ body.dark {
     -webkit-user-select: none;
     user-select: none;
 }
+input, textarea, select, [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+}
 body {
     font-family: system-ui;
     background: var(--bg);
@@ -338,8 +342,9 @@ body.dark .home-btn {
 .swipe-card {
     position: relative;
     overflow: hidden;
-    transition: transform .2s;
+    transition: transform 0.2s ease;
     user-select: none;
+    border-radius: 16px;
 }
 
 /* Итого за день */
@@ -383,14 +388,8 @@ body.dark .nav-back .btn {
     border-color: #3b4a54;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
+
 /* Свайп-анимация */
-.swipe-card {
-    position: relative;
-    overflow: hidden;
-    user-select: none;
-    transition: transform 0.2s ease;
-    border-radius: 16px;
-}
 .swipe-bg {
     position: absolute;
     top: 0;
@@ -408,17 +407,48 @@ body.dark .nav-back .btn {
 }
 .swipe-bg-left {
     left: 0;
-    background: #27ae60;
     border-radius: 16px 0 0 16px;
 }
 .swipe-bg-right {
     right: 0;
-    background: #e74c3c;
     border-radius: 0 16px 16px 0;
 }
 .swipe-bg.show {
     opacity: 1;
 }
-#todayList, #tomorrowList, #recordsList {
+.swipe-bg-green { background: #27ae60; }
+.swipe-bg-red { background: #e74c3c; }
+.swipe-bg-blue { background: #3498db; }
+.swipe-bg-orange { background: #f39c12; }
+
+/* Контейнеры с overflow */
+#todayList, #tomorrowList, #recordsList, #historyList, #clientsList, #inactiveList, #expensesList, #servicesList {
     overflow: hidden;
+}
+
+/* Модалка уведомлений */
+#alertModal .modal-content {
+    text-align: center;
+    padding: 24px 20px;
+}
+#alertMessage {
+    margin-bottom: 16px;
+    font-size: .95rem;
+    line-height: 1.4;
+    color: var(--text);
+}
+#alertButtons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+#alertButtons button {
+    flex: 1;
+    padding: 12px;
+    border-radius: var(--br);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: .9rem;
+    min-width: 80px;
 }

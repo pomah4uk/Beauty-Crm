@@ -1,18 +1,20 @@
 // ===== МОДАЛКИ =====
 
 import { data, nextId, clientPhone, todayStr, updateLastVisit, save } from './data.js';
-import { toast, show, hide, copyPhone, callPhone, alertModal, confirmModal } from './utils.js';
+import { toast, show, hide, callPhone, alertModal, confirmModal } from './utils.js';
 import { renderHistory, renderServices } from './render.js';
 
 let editClientId = null;
 let editServiceId = null;
 let statsClientId = null;
 let editRecordId = null;
+let editExpenseId = null;
 
 window.editClientId = null;
 window.editServiceId = null;
 window.statsClientId = null;
 window.editRecordId = null;
+window.editExpenseId = null;
 
 // ===== МОДАЛКА КЛИЕНТА =====
 export function openClientModal() {
@@ -270,25 +272,48 @@ export async function cancelRecord(id) {
 
 // ===== МОДАЛКА РАСХОДА =====
 export function openExpenseModal() {
+    editExpenseId = null;
     document.getElementById('expenseAmount').value = '';
     document.getElementById('expenseComment').value = '';
     show('expenseModal');
 }
 
+export function editExpense(id) {
+    let e = data.expenses.find(x => x.id === id);
+    if (e) {
+        document.getElementById('expenseAmount').value = e.amount;
+        document.getElementById('expenseComment').value = e.comment || '';
+        editExpenseId = id;
+        show('expenseModal');
+    }
+}
+
 document.getElementById('saveExpenseBtn').onclick = function() {
     let a = parseInt(document.getElementById('expenseAmount').value);
     if (!a || a <= 0) { alertModal('Введите сумму'); return; }
-    data.expenses.push({
-        id: nextId(data.expenses),
-        amount: a,
-        comment: document.getElementById('expenseComment').value || 'Без комментария',
-        date: todayStr()
-    });
+    
+    if (editExpenseId) {
+        let e = data.expenses.find(x => x.id === editExpenseId);
+        if (e) {
+            e.amount = a;
+            e.comment = document.getElementById('expenseComment').value || 'Без комментария';
+            e.date = todayStr();
+        }
+        editExpenseId = null;
+    } else {
+        data.expenses.push({
+            id: nextId(data.expenses),
+            amount: a,
+            comment: document.getElementById('expenseComment').value || 'Без комментария',
+            date: todayStr()
+        });
+    }
     save();
     hide('expenseModal');
 };
 
 document.getElementById('cancelExpenseBtn').onclick = function() {
+    editExpenseId = null;
     hide('expenseModal');
 };
 

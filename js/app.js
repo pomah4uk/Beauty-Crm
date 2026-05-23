@@ -1,22 +1,22 @@
 // ===== ТОЧКА ВХОДА =====
 
-import { setPage, setOnPageChange } from './router.js?v=3';
-import { renderHistory, renderServices, setPeriod, shiftPeriod } from './render.js?v=3';
+import { setPage, setOnPageChange } from './router.js?v=4';
+import { renderHistory, renderServices, setPeriod, shiftPeriod } from './render.js?v=4';
 import {
-    openClientModal, openRecordModal, openExpenseModal,
+    openClientModal, openRecordModal, openExpenseModal, editExpense,
     openServiceModal, editService, showClientStats,
     editRecord, completeRecord, cancelRecord,
     deleteRecord, deleteExpense, deleteService,
     openInactiveModal, exportData, importData, resetData
-} from './modals.js?v=3';
-import { copyPhone, callPhone } from './utils.js?v=3';
-import { initTheme } from './theme.js?v=3';
+} from './modals.js?v=4';
+import { callPhone } from './utils.js?v=4';
+import { initTheme } from './theme.js?v=4';
 
 // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
-window.copyPhone = copyPhone;
 window.callPhone = callPhone;
 window.showClientStats = showClientStats;
 window.editService = editService;
+window.editExpense = editExpense;
 window.editRecord = editRecord;
 window.completeRecord = completeRecord;
 window.cancelRecord = cancelRecord;
@@ -86,7 +86,7 @@ document.getElementById('importFile').onchange = function(e) {
     let f = e.target.files[0];
     if (f) { importData(f); e.target.value = ''; }
 };
-document.getElementById('resetBtn').onclick = resetData;
+document.getElementById('resetBtn').onclick = function() { resetData(); };
 
 // ===== ЗАКРЫТИЕ МОДАЛОК =====
 document.querySelectorAll('.modal').forEach(modal => {
@@ -106,6 +106,11 @@ function updateNavBack(page) {
 }
 setOnPageChange(updateNavBack);
 
+// ===== КНОПКА ДОМОЙ =====
+window.goHome = function() {
+    setPage('dashboard');
+};
+
 // ===== КНОПКА ВВЕРХ =====
 window.addEventListener('scroll', function() {
     let btn = document.querySelector('.scroll-top');
@@ -122,11 +127,6 @@ document.body.appendChild(sb);
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
 }
-
-// ===== КНОПКА ДОМОЙ =====
-window.goHome = function() {
-    setPage('dashboard');
-};
 
 // ===== СТАРТ =====
 setPage('dashboard');

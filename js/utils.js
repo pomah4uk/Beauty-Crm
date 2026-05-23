@@ -18,12 +18,6 @@ export function hide(id) {
     if (el) el.style.display = 'none';
 }
 
-export function copyPhone(p) {
-    navigator.clipboard.writeText(p)
-        .then(() => toast('📋 Скопировано'))
-        .catch(() => toast('Не удалось скопировать'));
-}
-
 export function callPhone(p) {
     window.open('tel:' + p, '_self');
 }
