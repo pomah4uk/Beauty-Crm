@@ -12,6 +12,9 @@ import {
 import { callPhone } from './utils.js?v=6';
 import { initTheme } from './theme.js?v=6';
 
+
+window.openRecordModal = openRecordModal;
+
 // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
 window.callPhone = callPhone;
 window.showClientStats = showClientStats;

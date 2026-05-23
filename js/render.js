@@ -1,7 +1,7 @@
 // ===== РЕНДЕРЫ СТРАНИЦ =====
 
 import { data, clientName, clientPhone, todayStr, daysSince, updateLastVisit, monthExp, save, getServiceColor } from './data.js';
-import { toast, callPhone, confirmModal } from './utils.js';
+import { toast, callPhone, confirmModal, modalActive } from './utils.js';
 
 // ===== ПЕРИОД =====
 let currentPeriod = 'month';
@@ -207,8 +207,7 @@ function addSwipeListeners(elId) {
         }, { passive: false });
 
         card.addEventListener('touchend', async function() {
-            // Если модалка уже открыта — игнорируем
-            if (window._modalActive) return;
+            if (modalActive) return;
             
             let diff = currentX - startX;
             card.style.transition = 'transform 0.2s ease';
@@ -246,20 +245,10 @@ function addSwipeListeners(elId) {
                     if (ok) window.deleteRecord(id);
                 } else if (type === 'client') {
                     let ok = await confirmModal('📝 Создать запись для этого клиента?');
-                    if (ok) {
-                        window.showClientStats(id);
-                        setTimeout(() => {
-                            document.getElementById('createRecordForClientBtn')?.click();
-                        }, 500);
-                    }
+                    if (ok) window.openRecordModal(id);
                 } else if (type === 'inactive') {
                     let ok = await confirmModal('📝 Создать запись для этого клиента?');
-                    if (ok) {
-                        window.showClientStats(id);
-                        setTimeout(() => {
-                            document.getElementById('createRecordForClientBtn')?.click();
-                        }, 500);
-                    }
+                    if (ok) window.openRecordModal(id);
                 } else if (type === 'expense') {
                     let ok = await confirmModal('🗑️ Удалить расход?');
                     if (ok) window.deleteExpense(id);
