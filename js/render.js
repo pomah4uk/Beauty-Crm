@@ -1,6 +1,6 @@
 // ===== РЕНДЕРЫ СТРАНИЦ =====
 
-import { data, clientName, clientPhone, todayStr, daysSince, updateLastVisit, monthExp, save } from './data.js';
+import { data, clientName, clientPhone, todayStr, daysSince, updateLastVisit, monthExp, save, getServiceColor } from './data.js';
 import { toast, copyPhone, callPhone } from './utils.js';
 
 // ===== ПЕРИОД =====
@@ -27,7 +27,6 @@ export function renderDashboard() {
     let n = currentDate;
     let m = n.getMonth(), y = n.getFullYear();
     
-    // Фильтруем записи по периоду
     let periodRecords;
     let periodLabel;
     
@@ -51,7 +50,7 @@ export function renderDashboard() {
     } else if (currentPeriod === 'month') {
         exp = monthExp(m, y);
     } else {
-        exp = monthExp(0, y); // все месяцы года
+        exp = data.expenses.filter(e => new Date(e.date).getFullYear() === y).reduce((s, e) => s + e.amount, 0);
     }
     
     let canc;
@@ -68,7 +67,6 @@ export function renderDashboard() {
     let ss = {}; periodRecords.forEach(r => { if (r.service) ss[r.service] = (ss[r.service] || 0) + 1; });
     let top = Object.entries(ss).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
 
-    // Обновляем заголовок периода
     let periodLabelEl = document.getElementById('periodLabel');
     if (periodLabelEl) periodLabelEl.innerText = periodLabel;
 
@@ -83,17 +81,22 @@ export function renderDashboard() {
 
     function renderCal(list, elId) {
         let h = '';
+        let dayTotal = 0;
         if (!list.length) {
             h = '<div style="text-align:center;color:#999;padding:8px">Нет записей</div>';
         } else {
             list.forEach(r => {
                 let p = clientPhone(r.clientId);
-                h += `<div class="card pad12 mb8" style="cursor:default">
+                let color = getServiceColor(r.service?.split(' + ')[0]);
+                dayTotal += r.price || 0;
+                h += `<div class="card swipe-card pad12 mb8" style="cursor:default;border-left:4px solid ${color}" data-id="${r.id}">
                     <div class="flex between mb8"><span class="card-name">${clientName(r.clientId)}</span><span style="font-size:.85rem;color:#666">${r.time||'12:00'} — ${r.service||'—'}</span></div>
-                    <div class="flex end gap12">${p?`<button class="call-btn" onclick="window.callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="window.editRecord(${r.id})" style="background:#f39c12;color:#fff">✏️</button><button class="small-btn" onclick="window.completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="window.cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
+                    <div class="flex end gap12">${p?`<button class="call-btn" onclick="window.callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="window.editRecord(${r.id})" style="background:#f39c12;color:#fff">✏️</button></div></div>`;
             });
         }
         document.getElementById(elId).innerHTML = h;
+        document.getElementById(elId + 'Total').innerText = dayTotal;
+        addSwipeListeners(elId);
     }
     renderCal(todayRecords, 'todayList');
     renderCal(tomorrowRecords, 'tomorrowList');
@@ -129,6 +132,60 @@ export function renderDashboard() {
     document.getElementById('inactiveList').innerHTML = h;
 }
 
+function addSwipeListeners(elId) {
+    let container = document.getElementById(elId);
+    if (!container) return;
+    container.querySelectorAll('.swipe-card').forEach(card => {
+        let startX = 0, currentX = 0;
+        let bgLeft, bgRight;
+
+        // Создаём фоновые подложки
+        bgLeft = document.createElement('div');
+        bgLeft.className = 'swipe-bg swipe-bg-left';
+        bgLeft.textContent = '✅';
+        card.appendChild(bgLeft);
+
+        bgRight = document.createElement('div');
+        bgRight.className = 'swipe-bg swipe-bg-right';
+        bgRight.textContent = '❌';
+        card.appendChild(bgRight);
+
+        card.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            card.style.transition = 'none';
+        });
+
+        card.addEventListener('touchmove', function(e) {
+            currentX = e.touches[0].clientX;
+            let diff = currentX - startX;
+            if (Math.abs(diff) > 20) {
+                card.style.transform = `translateX(${diff}px)`;
+                if (diff > 0) {
+                    bgLeft.classList.add('show');
+                    bgRight.classList.remove('show');
+                } else {
+                    bgRight.classList.add('show');
+                    bgLeft.classList.remove('show');
+                }
+            }
+        });
+
+        card.addEventListener('touchend', function(e) {
+            let diff = currentX - startX;
+            card.style.transition = 'transform 0.2s ease';
+            card.style.transform = '';
+            bgLeft.classList.remove('show');
+            bgRight.classList.remove('show');
+
+            let id = parseInt(card.dataset.id);
+            if (Math.abs(diff) > 80) {
+                if (diff > 0) window.completeRecord(id);
+                else window.cancelRecord(id);
+            }
+        });
+    });
+}
+
 // ===== КЛИЕНТЫ =====
 export function renderClients() {
     let s = document.getElementById('clientSearch').value.toLowerCase();
@@ -149,9 +206,13 @@ export function renderActive() {
     let h = '';
     data.records.filter(r => r.status === 'active' && clientName(r.clientId).toLowerCase().includes(s)).forEach(r => {
         let p = clientPhone(r.clientId);
-        h += `<div class="card"><div class="card-header"><span class="card-name">${clientName(r.clientId)}</span><span class="status-badge badge-blue">📝</span></div><div class="card-row"><span>📅</span><span>${r.date||'—'} ${r.time||'12:00'}</span></div><div class="card-row"><span>💉</span><span>${r.service||'—'}</span></div><div class="card-row"><span>💰</span><span>${r.price?r.price+'₽':'—'}</span></div><div class="card-actions">${p?`<button class="call-btn" onclick="event.stopPropagation();window.callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="event.stopPropagation();window.editRecord(${r.id})" style="background:#f39c12;color:#fff">✏️</button><button class="small-btn" onclick="event.stopPropagation();window.completeRecord(${r.id})" style="background:#27ae60;color:#fff">✅</button><button class="small-btn" onclick="event.stopPropagation();window.cancelRecord(${r.id})" style="background:#e74c3c;color:#fff">❌</button></div></div>`;
+        let color = getServiceColor(r.service?.split(' + ')[0]);
+        h += `<div class="card swipe-card pad12 mb8" style="border-left:4px solid ${color}" data-id="${r.id}">
+            <div class="flex between mb8"><span class="card-name">${clientName(r.clientId)}</span><span style="font-size:.85rem;color:#666">${r.time||'12:00'} — ${r.service||'—'}</span></div>
+            <div class="flex end gap12">${p?`<button class="call-btn" onclick="event.stopPropagation();window.callPhone('${p}')">📞</button>`:''}<button class="small-btn" onclick="event.stopPropagation();window.editRecord(${r.id})" style="background:#f39c12;color:#fff">✏️</button></div></div>`;
     });
     document.getElementById('recordsList').innerHTML = h || '<div style="text-align:center;color:#999;padding:20px">Нет активных записей</div>';
+    addSwipeListeners('recordsList');
 }
 
 // ===== ИСТОРИЯ =====
@@ -180,7 +241,7 @@ export function renderExpenses() {
 export function renderServices() {
     let h = '';
     data.services.forEach(s => {
-        h += `<div class="card"><div class="card-header"><span class="card-name">${s.name}</span><span style="font-size:.85rem;color:#666">${s.price?s.price+'₽':'без цены'}</span></div><div class="card-actions"><button class="small-btn" onclick="event.stopPropagation();window.editService(${s.id})">✏️</button><button class="small-btn" onclick="event.stopPropagation();window.deleteService(${s.id})">🗑️</button></div></div>`;
+        h += `<div class="card"><div class="card-header"><span class="card-name"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${s.color};margin-right:6px"></span>${s.name}</span><span style="font-size:.85rem;color:#666">${s.price?s.price+'₽':'без цены'}</span></div><div class="card-actions"><button class="small-btn" onclick="event.stopPropagation();window.editService(${s.id})">✏️</button><button class="small-btn" onclick="event.stopPropagation();window.deleteService(${s.id})">🗑️</button></div></div>`;
     });
     document.getElementById('servicesList').innerHTML = h || '<div style="text-align:center;color:#999;padding:20px">Нет услуг</div>';
 }

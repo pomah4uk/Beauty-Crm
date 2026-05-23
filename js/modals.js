@@ -10,11 +10,12 @@ let editServiceId = null;
 let statsClientId = null;
 let editRecordId = null;
 
-// Экспортируем для глобального доступа
 window.editClientId = null;
 window.editServiceId = null;
 window.statsClientId = null;
 window.editRecordId = null;
+
+const COLORS = ['#e74c3c','#f39c12','#3498db','#27ae60','#9b59b6','#1abc9c','#e67e22','#95a5a6'];
 
 // ===== МОДАЛКА КЛИЕНТА =====
 export function openClientModal() {
@@ -295,6 +296,7 @@ export function openServiceModal() {
     editServiceId = null;
     document.getElementById('serviceName').value = '';
     document.getElementById('servicePrice').value = '';
+    document.getElementById('serviceColor').value = '#3498db';
     document.getElementById('serviceModalTitle').innerText = '➕ Услуга';
     show('serviceModal');
 }
@@ -304,6 +306,7 @@ export function editService(id) {
     if (s) {
         document.getElementById('serviceName').value = s.name;
         document.getElementById('servicePrice').value = s.price || '';
+        document.getElementById('serviceColor').value = s.color || '#3498db';
         editServiceId = id;
         document.getElementById('serviceModalTitle').innerText = '✏️ Услуга';
         show('serviceModal');
@@ -316,7 +319,8 @@ document.getElementById('saveServiceBtn').onclick = function() {
     let s = {
         id: editServiceId || nextId(data.services),
         name: n,
-        price: parseInt(document.getElementById('servicePrice').value) || 0
+        price: parseInt(document.getElementById('servicePrice').value) || 0,
+        color: document.getElementById('serviceColor').value
     };
     if (editServiceId) {
         let i = data.services.findIndex(x => x.id === editServiceId);
@@ -454,7 +458,7 @@ export function importData(file) {
             data.clients = imported.clients || [];
             data.records = imported.records || [];
             data.expenses = imported.expenses || [];
-            data.services = imported.services || [{ id: 1, name: 'Консультация', price: 0 }];
+            data.services = imported.services || [{ id: 1, name: 'Консультация', price: 0, color: '#3498db' }];
             data.inactiveDays = imported.inactiveDays || 30;
             save();
             toast('✅ Восстановлено');
@@ -470,7 +474,7 @@ export function resetData() {
         data.clients = [];
         data.records = [];
         data.expenses = [];
-        data.services = [{ id: 1, name: 'Консультация', price: 0 }];
+        data.services = [{ id: 1, name: 'Консультация', price: 0, color: '#3498db' }];
         data.inactiveDays = 30;
         save();
         toast('🗑️ Удалено');

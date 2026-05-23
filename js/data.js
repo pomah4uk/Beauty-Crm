@@ -4,16 +4,15 @@ export let data = JSON.parse(localStorage.getItem('data')) || {
     records: [],
     expenses: [],
     services: [
-        { id: 1, name: 'Увеличение губ', price: 0 },
-        { id: 2, name: 'Увеличение губ 0.5', price: 0 },
-        { id: 3, name: 'Носогубки', price: 0 },
-        { id: 4, name: 'Биоревитализация', price: 0 },
-        { id: 5, name: 'Липолитики', price: 0 }
+        { id: 1, name: 'Увеличение губ', price: 8000, color: '#e74c3c' },
+        { id: 2, name: 'Увеличение губ 0.5', price: 4000, color: '#f39c12' },
+        { id: 3, name: 'Носогубки', price: 7000, color: '#3498db' },
+        { id: 4, name: 'Биоревитализация', price: 6000, color: '#27ae60' },
+        { id: 5, name: 'Липолитики', price: 5000, color: '#9b59b6' }
     ],
     inactiveDays: 30
 };
 
-// Слушатели изменений
 const listeners = [];
 
 export function onDataChange(fn) {
@@ -68,4 +67,9 @@ export function monthExp(month, year) {
             return d.getMonth() === m && d.getFullYear() === y;
         })
         .reduce((s, e) => s + e.amount, 0);
+}
+
+export function getServiceColor(name) {
+    let s = data.services.find(x => x.name === name);
+    return s ? s.color || '#95a5a6' : '#95a5a6';
 }

@@ -20,18 +20,22 @@
 <!-- ГЛАВНАЯ -->
 <div id="pageDashboard">
     <div class="flex gap12 mb12">
-        <button id="addRecordBtn" class="btn btn-success">📝 Запись клиента</button>
-        <button id="addExpenseBtn" class="btn btn-orange">➕ Расход</button>
-    </div>    
+        <button id="addRecordBtn" class="btn btn-success" style="flex:1">📝 Запись</button>
+        <button id="addExpenseBtn" class="btn btn-orange" style="width:48px;flex-shrink:0;border-radius:14px;font-size:1.2rem">₽</button>
+    </div>
+
     <!-- КАЛЕНДАРЬ -->
     <div class="report-block mb12" id="todayBlock">
         <h3 class="mb12">📅 Сегодня (<span id="todayDate"></span>)</h3>
         <div id="todayList"></div>
+        <div class="day-total">💰 Итого за сегодня: <span id="todayListTotal">0</span>₽</div>
     </div>
     <div class="report-block mb12" id="tomorrowBlock">
         <h3 class="mb12">📅 Завтра (<span id="tomorrowDate"></span>)</h3>
         <div id="tomorrowList"></div>
+        <div class="day-total">💰 Итого за завтра: <span id="tomorrowListTotal">0</span>₽</div>
     </div>
+
     <!-- ПЕРИОД -->
     <div class="report-block mb12">
         <div class="flex gap12 mb12" id="periodTabs">
@@ -45,6 +49,7 @@
             <button class="small-btn" id="periodNext">▶</button>
         </div>
     </div>
+
     <div class="dash-stats">
         <div class="dash-stat" data-nav="clients"><div class="dash-stat-label">👥 Всего клиентов</div><div class="dash-stat-value" id="statTotalClients">0</div></div>
         <div class="dash-stat"><div class="dash-stat-label">💰 Средний чек</div><div class="dash-stat-value" id="statAvgCheck">0₽</div></div>
@@ -52,14 +57,15 @@
     </div>
     <div class="dash-stats">
         <div class="dash-stat" data-nav="active"><div class="dash-stat-label">📝 Активных</div><div class="dash-stat-value" id="statActive">0</div></div>
-        <div class="dash-stat" data-nav="completed"><div class="dash-stat-label">✅ Выполнено (мес)</div><div class="dash-stat-value" id="statCompleted">0</div></div>
-        <div class="dash-stat" data-nav="cancelled"><div class="dash-stat-label">❌ Отменено (мес)</div><div class="dash-stat-value" id="statCancelled">0</div></div>
+        <div class="dash-stat" data-nav="completed"><div class="dash-stat-label">✅ Выполнено</div><div class="dash-stat-value" id="statCompleted">0</div></div>
+        <div class="dash-stat" data-nav="cancelled"><div class="dash-stat-label">❌ Отменено</div><div class="dash-stat-value" id="statCancelled">0</div></div>
     </div>
     <div class="dash-stats">
-        <div class="dash-stat"><div class="dash-stat-label">💰 Выручка (мес)</div><div class="dash-stat-value" id="statRevenue">0₽</div></div>
-        <div class="dash-stat" data-nav="expenses"><div class="dash-stat-label">💸 Затраты (мес)</div><div class="dash-stat-value" id="statCost">0₽</div></div>
-        <div class="dash-stat"><div class="dash-stat-label">📈 Чистая прибыль</div><div class="dash-stat-value" id="statProfit">0₽</div></div>
+        <div class="dash-stat"><div class="dash-stat-label">💰 Выручка</div><div class="dash-stat-value" id="statRevenue">0₽</div></div>
+        <div class="dash-stat" data-nav="expenses"><div class="dash-stat-label">💸 Затраты</div><div class="dash-stat-value" id="statCost">0₽</div></div>
+        <div class="dash-stat"><div class="dash-stat-label">📈 Прибыль</div><div class="dash-stat-value" id="statProfit">0₽</div></div>
     </div>
+
     <div class="report-block">
         <h3 class="mb12" id="inactiveTitle" style="cursor:pointer">⏰ Давно не заходили (>&nbsp;<span id="inactiveDaysLabel">30</span>&nbsp;дней) ⚙️</h3>
         <div id="inactiveList"></div>
@@ -165,6 +171,10 @@
         <h3 id="serviceModalTitle">➕ Услуга</h3>
         <label class="modal-label">Название</label><input class="modal-input" id="serviceName" placeholder="Например: Стрижка">
         <label class="modal-label">Цена по умолчанию</label><input type="number" class="modal-input" id="servicePrice" placeholder="0">
+        <label class="modal-label">Цвет</label>
+        <div class="flex gap12 mb12" id="colorPicker">
+            <input type="color" class="modal-input" id="serviceColor" value="#3498db" style="width:48px;height:48px;padding:0;border:none;cursor:pointer">
+        </div>
         <div class="modal-buttons"><button id="cancelServiceBtn">Отмена</button><button id="saveServiceBtn">Сохранить</button></div>
     </div>
 </div>
@@ -191,6 +201,7 @@
         <button id="closeStatsBtn" class="btn btn-primary mt12">Закрыть</button>
     </div>
 </div>
+
 <!-- КНОПКА НАЗАД -->
 <div class="nav-back" id="navBack" style="display:none">
     <button class="btn" onclick="window.goHome()">← Назад</button>
