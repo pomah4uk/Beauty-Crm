@@ -50,6 +50,7 @@ body.dark .day-total { border-top-color: #3b4a54; }
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     font-size: .85rem;
     font-weight: 600;
+    background: #ff1515;
 }
 body.dark .nav-back .btn {
     border-color: #3b4a54;

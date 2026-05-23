@@ -12,7 +12,7 @@ export function getCurrentDate() { return currentDate; }
 
 export function setPeriod(period) {
     currentPeriod = period;
-    currentDate = new Date(); // всегда сбрасываем на сегодня
+    currentDate = new Date();
     document.querySelectorAll('#periodTabs .period-tab').forEach(b => b.classList.remove('active'));
     document.querySelector(`#periodTabs .period-tab[data-period="${period}"]`)?.classList.add('active');
     renderDashboard();
@@ -90,9 +90,11 @@ export function renderDashboard() {
             list.forEach(r => {
                 let p = clientPhone(r.clientId);
                 let color = getServiceColor(r.service?.split(' + ')[0]);
+                let c = data.clients.find(x => x.id === r.clientId);
                 dayTotal += r.price || 0;
                 h += `<div class="card swipe-card pad12 mb8" style="cursor:pointer;border-left:4px solid ${color}" data-id="${r.id}" data-type="record-active" onclick="window.editRecord(${r.id})">
                     <div class="flex between mb8"><span class="card-name">${clientName(r.clientId)}</span><span style="font-size:.85rem;color:#666">${r.time||'12:00'} — ${r.service||'—'}</span></div>
+                    ${c && c.comment ? `<div style="font-size:.75rem;color:#888;margin-bottom:8px">💬 ${c.comment}</div>` : ''}
                     ${p?`<button class="btn btn-success" style="margin-top:8px;margin-bottom:0" onclick="event.stopPropagation();window.callPhone('${p}')">📞 Позвонить</button>`:''}</div>`;
             });
         }
@@ -127,7 +129,8 @@ export function renderDashboard() {
             let d = daysSince(c.lastDate), cls = d > 60 ? 'days-danger' : 'days-warn';
             let cid = c.id;
             h += `<div class="card swipe-card pad12 mb8" style="cursor:pointer" data-id="${cid}" data-type="inactive" onclick="window.showClientStats(${cid})">
-                <div class="flex between mb8"><span class="card-name">${c.name}</span><span class="days-badge ${cls}">${d} дн</span></div></div>`;
+                <div class="flex between mb8"><span class="card-name">${c.name}</span><span class="days-badge ${cls}">${d} дн</span></div>
+                ${c.comment ? `<div style="font-size:.75rem;color:#888">💬 ${c.comment}</div>` : ''}</div>`;
         });
     }
     document.getElementById('inactiveList').innerHTML = h;

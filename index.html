@@ -151,6 +151,8 @@
         <label class="modal-label">Имя</label><input class="modal-input" id="clientName" placeholder="Введите имя">
         <label class="modal-label">Телефон</label><input class="modal-input" id="clientPhone" placeholder="+7 (___) ___-__-__">
         <label class="modal-label">Дата рождения</label><input type="date" class="modal-input" id="clientBirth">
+        <label class="modal-label">Комментарий</label>
+        <textarea class="modal-input" id="clientComment" placeholder="Комментарий" rows="2"></textarea>
         <div class="modal-buttons"><button id="cancelClientBtn">Отмена</button><button id="saveClientBtn">Сохранить</button></div>
     </div>
 </div>
@@ -159,26 +161,48 @@
 <div id="recordModal" class="modal">
     <div class="modal-content">
         <h3>📝 Запись клиента</h3>
+        
+        <!-- Поиск клиента -->
         <label class="modal-label">Клиент</label>
-        <select class="modal-select" id="recordClientSelect">
-            <option value="">-- Выберите --</option>
-            <option value="__new__">+ Новый клиент</option>
-        </select>
+        <input class="modal-input" id="clientSearchInput" placeholder="Введите имя для поиска" autocomplete="off">
+        <div id="clientDropdown" class="hidden" style="background:var(--card);border-radius:14px;margin-bottom:8px;max-height:150px;overflow-y:auto;border:1px solid #ccc"></div>
+        
+        <!-- Новый клиент -->
         <div id="newClientFields" class="hidden">
-            <label class="modal-label">Имя нового клиента</label><input class="modal-input" id="newClientName" placeholder="Имя">
-            <label class="modal-label">Телефон</label><input class="modal-input" id="newClientPhone" placeholder="+7 (___) ___-__-__">
+            <label class="modal-label">Телефон</label>
+            <input class="modal-input" id="newClientPhone" placeholder="+7 (___) ___-__-__" type="tel" inputmode="tel">
+            <label class="modal-label">Дата рождения</label>
+            <input class="modal-input" id="newClientBirth" placeholder="ДД.ММ.ГГГГ" type="text" inputmode="numeric" maxlength="10">
         </div>
+        
         <div class="flex mb8" id="callLinkRow" style="display:none">
             <span style="font-size:.85rem">📞</span><a id="callClientLink" href="#" style="color:#27ae60;text-decoration:none;font-size:.8rem">Позвонить клиенту</a>
         </div>
-        <label class="modal-label">Дата</label><input type="date" class="modal-input" id="recordDate">
-        <label class="modal-label">Время</label><input type="time" class="modal-input" id="recordTime" value="12:00">
+        
+        <label class="modal-label">Дата</label>
+        <input type="date" class="modal-input" id="recordDate">
+        <label class="modal-label">Время</label>
+        <input type="time" class="modal-input" id="recordTime" value="12:00">
         <div class="modal-hint">Только сегодня или будущая дата</div>
-        <label class="modal-label">Услуги</label><div id="servicesContainer"></div>
+        
+        <label class="modal-label">Услуги</label>
+        <div id="servicesContainer"></div>
         <button id="addServiceRowBtn" class="small-btn mb12">+ Добавить услугу</button>
         <div class="total-display">Общая сумма: <span id="recordTotalDisplay">0</span>₽</div>
         <input type="hidden" id="recordPrice" value="0">
-        <div class="modal-buttons"><button id="cancelRecordBtn">Отмена</button><button id="saveRecordBtn">Сохранить</button></div>
+        
+        <!-- Препарат -->
+        <label class="modal-label">Препарат</label>
+        <input class="modal-input" id="recordPreparat" placeholder="Название препарата">
+        
+        <!-- Комментарий -->
+        <label class="modal-label">Комментарий</label>
+        <textarea class="modal-input" id="recordComment" placeholder="Комментарий" rows="2"></textarea>
+        
+        <div class="modal-buttons">
+            <button id="cancelRecordBtn">Отмена</button>
+            <button id="saveRecordBtn">Сохранить</button>
+        </div>
     </div>
 </div>
 

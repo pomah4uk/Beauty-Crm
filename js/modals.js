@@ -15,6 +15,7 @@ export function openClientModal() {
     document.getElementById('clientName').value = '';
     document.getElementById('clientPhone').value = '';
     document.getElementById('clientBirth').value = '';
+    document.getElementById('clientComment').value = '';
     document.getElementById('clientModalTitle').innerText = '➕ Клиент';
     show('clientModal');
 }
@@ -27,6 +28,7 @@ document.getElementById('saveClientBtn').onclick = function() {
         name,
         phone: document.getElementById('clientPhone').value,
         birth: document.getElementById('clientBirth').value,
+        comment: document.getElementById('clientComment').value || '',
         lastDate: '',
         lastService: ''
     };
@@ -45,48 +47,99 @@ document.getElementById('cancelClientBtn').onclick = function() {
 };
 
 // ===== МОДАЛКА ЗАПИСИ =====
+let selectedClientId = null;
+
 export function openRecordModal(clientId) {
     editRecordId = null;
-    let sel = document.getElementById('recordClientSelect');
-    sel.innerHTML = '<option value="">-- Выберите --</option><option value="__new__">+ Новый клиент</option>';
-    data.clients.forEach(c => {
-        let o = document.createElement('option');
-        o.value = c.id;
-        o.textContent = c.name;
-        if (c.id === clientId) o.selected = true;
-        sel.appendChild(o);
-    });
+    
+    let searchInput = document.getElementById('clientSearchInput');
+    searchInput.value = clientId ? (data.clients.find(c => c.id === clientId)?.name || '') : '';
+    selectedClientId = clientId || null;
+    
+    document.getElementById('clientDropdown').classList.add('hidden');
     document.getElementById('newClientFields').classList.add('hidden');
     document.getElementById('callLinkRow').style.display = clientId ? 'flex' : 'none';
-    document.getElementById('newClientName').value = '';
     document.getElementById('newClientPhone').value = '';
+    document.getElementById('newClientBirth').value = '';
     document.getElementById('recordDate').value = todayStr();
     document.getElementById('recordDate').setAttribute('min', todayStr());
     document.getElementById('recordTime').value = '12:00';
     document.getElementById('servicesContainer').innerHTML = '';
     addServiceRow('');
     updateTotal();
-    if (clientId) updateCallLink();
+    document.getElementById('recordPreparat').value = '';
+    document.getElementById('recordComment').value = '';
+    
+    if (clientId) {
+        updateCallLink();
+        let c = data.clients.find(x => x.id === clientId);
+        if (c && c.comment) {
+            document.getElementById('recordComment').value = c.comment;
+        }
+    }
+    
     show('recordModal');
+    setTimeout(() => searchInput.focus(), 200);
 }
 
-document.getElementById('recordClientSelect').onchange = function() {
-    let v = this.value;
-    if (v === '__new__') {
-        document.getElementById('newClientFields').classList.remove('hidden');
-        document.getElementById('callLinkRow').style.display = 'none';
-    } else if (v) {
+// Поиск клиента при вводе
+document.getElementById('clientSearchInput').addEventListener('input', function() {
+    let val = this.value.trim().toLowerCase();
+    let dropdown = document.getElementById('clientDropdown');
+    
+    if (!val) {
+        dropdown.classList.add('hidden');
         document.getElementById('newClientFields').classList.add('hidden');
-        document.getElementById('callLinkRow').style.display = 'flex';
-        updateCallLink();
+        return;
+    }
+    
+    let matches = data.clients.filter(c => c.name.toLowerCase().includes(val)).slice(0, 5);
+    
+    if (matches.length === 0) {
+        dropdown.classList.add('hidden');
+        document.getElementById('newClientFields').classList.remove('hidden');
+        selectedClientId = null;
+        document.getElementById('callLinkRow').style.display = 'none';
+        document.getElementById('recordComment').value = '';
     } else {
         document.getElementById('newClientFields').classList.add('hidden');
-        document.getElementById('callLinkRow').style.display = 'none';
+        let h = '';
+        matches.forEach(c => {
+            let commentEscaped = (c.comment || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            h += `<div class="client-option" data-id="${c.id}" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f3f7" 
+                onmousedown="event.preventDefault(); 
+                document.getElementById('clientSearchInput').value='${c.name.replace(/'/g, "\\'")}'; 
+                document.getElementById('clientDropdown').classList.add('hidden'); 
+                document.getElementById('newClientFields').classList.add('hidden'); 
+                document.getElementById('callLinkRow').style.display='flex'; 
+                window._selectedClientId=${c.id}; 
+                document.getElementById('recordComment').value='${commentEscaped}';
+                window._updateCallLink();">
+                <span style="font-weight:600">${c.name}</span>
+                <span style="font-size:.75rem;color:#999;float:right">${c.phone||''}</span>
+            </div>`;
+        });
+        dropdown.innerHTML = h;
+        dropdown.classList.remove('hidden');
     }
+});
+
+// Глобальные функции для выпадающего списка
+window._selectedClientId = null;
+window._updateCallLink = function() {
+    selectedClientId = window._selectedClientId;
+    updateCallLink();
 };
 
+// Скрываем выпадающий список при клике вне
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#recordModal')) {
+        document.getElementById('clientDropdown').classList.add('hidden');
+    }
+});
+
 function updateCallLink() {
-    let p = clientPhone(parseInt(document.getElementById('recordClientSelect').value));
+    let p = clientPhone(selectedClientId);
     let l = document.getElementById('callClientLink');
     if (p) {
         l.href = 'tel:' + p;
@@ -146,25 +199,27 @@ document.getElementById('addServiceRowBtn').onclick = function() {
 };
 
 document.getElementById('saveRecordBtn').onclick = function() {
-    let v = document.getElementById('recordClientSelect').value;
-    let cid;
-
-    if (v === '__new__') {
-        let n = document.getElementById('newClientName').value.trim();
-        if (!n) { alertModal('Введите имя'); return; }
+    let cid = selectedClientId;
+    
+    if (!cid) {
+        let n = document.getElementById('clientSearchInput').value.trim();
+        if (!n) { alertModal('Введите имя клиента'); return; }
         let c = {
             id: nextId(data.clients),
             name: n,
             phone: document.getElementById('newClientPhone').value,
-            birth: '',
+            birth: document.getElementById('newClientBirth').value,
             lastDate: '',
-            lastService: ''
+            lastService: '',
+            comment: document.getElementById('recordComment').value || ''
         };
         data.clients.push(c);
         cid = c.id;
     } else {
-        cid = parseInt(v);
-        if (!cid) { alertModal('Выберите клиента'); return; }
+        let c = data.clients.find(x => x.id === cid);
+        if (c && document.getElementById('recordComment').value) {
+            c.comment = document.getElementById('recordComment').value;
+        }
     }
 
     if (document.getElementById('recordDate').value < todayStr()) {
@@ -186,6 +241,7 @@ document.getElementById('saveRecordBtn').onclick = function() {
         time: timeVal,
         service: names.join(' + '),
         price: parseInt(document.getElementById('recordPrice').value) || 0,
+        preparat: document.getElementById('recordPreparat').value || '',
         status: 'active'
     };
 
@@ -199,10 +255,12 @@ document.getElementById('saveRecordBtn').onclick = function() {
 
     save();
     hide('recordModal');
+    selectedClientId = null;
 };
 
 document.getElementById('cancelRecordBtn').onclick = function() {
     editRecordId = null;
+    selectedClientId = null;
     hide('recordModal');
 };
 
@@ -211,16 +269,10 @@ export function editRecord(id) {
     let r = data.records.find(x => x.id === id);
     if (!r || r.status !== 'active') return;
 
-    let sel = document.getElementById('recordClientSelect');
-    sel.innerHTML = '';
-    data.clients.forEach(c => {
-        let o = document.createElement('option');
-        o.value = c.id;
-        o.textContent = c.name;
-        if (c.id === r.clientId) o.selected = true;
-        sel.appendChild(o);
-    });
-
+    selectedClientId = r.clientId;
+    let c = data.clients.find(x => x.id === r.clientId);
+    document.getElementById('clientSearchInput').value = c ? c.name : '';
+    document.getElementById('clientDropdown').classList.add('hidden');
     document.getElementById('newClientFields').classList.add('hidden');
     document.getElementById('callLinkRow').style.display = 'flex';
     updateCallLink();
@@ -234,6 +286,8 @@ export function editRecord(id) {
     updateTotal();
     document.getElementById('recordPrice').value = r.price;
     document.getElementById('recordTotalDisplay').innerText = r.price;
+    document.getElementById('recordPreparat').value = r.preparat || '';
+    document.getElementById('recordComment').value = c?.comment || '';
 
     editRecordId = id;
     show('recordModal');
@@ -355,7 +409,7 @@ document.getElementById('cancelServiceBtn').onclick = function() {
     hide('serviceModal');
 };
 
-// ===== УДАЛЕНИЕ (без confirm — он уже в свайпе) =====
+// ===== УДАЛЕНИЕ =====
 export function deleteRecord(id) {
     data.records = data.records.filter(r => r.id !== id);
     save();
@@ -389,6 +443,7 @@ export function showClientStats(id) {
             <div class="card-row"><span>👤</span><span>${c.name}</span></div>
             <div class="card-row"><span>📞</span><span>${c.phone||'—'}</span></div>
             <div class="card-row"><span>🎂</span><span>${c.birth||'—'}</span></div>
+            <div class="card-row"><span>💬</span><span>${c.comment||'—'}</span></div>
             <div class="card-row"><span>✅</span><span>${done}</span></div>
             <div class="card-row"><span>❌</span><span>${canc}</span></div>
             <div class="card-row"><span>📊</span><span>${t}</span></div>
@@ -419,6 +474,7 @@ document.getElementById('editClientFromStatsBtn').onclick = function() {
     document.getElementById('clientName').value = c.name;
     document.getElementById('clientPhone').value = c.phone || '';
     document.getElementById('clientBirth').value = c.birth || '';
+    document.getElementById('clientComment').value = c.comment || '';
     editClientId = statsClientId;
     document.getElementById('clientModalTitle').innerText = '✏️ Клиент';
     show('clientModal');
@@ -457,10 +513,15 @@ document.getElementById('cancelInactiveDaysBtn').onclick = function() {
 
 // ===== ЭКСПОРТ / ИМПОРТ / СБРОС =====
 export function exportData() {
+    let blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    let url = URL.createObjectURL(blob);
     let a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    a.href = url;
     a.download = 'crm_' + Date.now() + '.json';
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
     toast('💾 Бэкап сохранён');
 }
 

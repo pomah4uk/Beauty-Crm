@@ -16,7 +16,7 @@ export function renderClients() {
             <div class="card-row"><span>📞</span><span>${c.phone||'—'}</span></div>
             <div class="card-row"><span>🎂</span><span>${c.birth||'—'}</span></div>
             <div class="card-row"><span>📅</span><span>${c.lastDate||'—'}</span></div>
-            <div class="card-row"><span>💉</span><span>${c.lastService||'—'}</span></div>
+            <div class="card-row"><span>💬</span><span>${c.comment||'—'}</span></div>
             <div class="card-row"><span>⭐ Рейтинг</span><span>${p}% (${done}/${t})</span></div>
             <div class="progress-bar"><div class="progress-fill" style="width:${p}%"></div></div></div>`;
     });
