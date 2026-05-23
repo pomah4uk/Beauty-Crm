@@ -136,10 +136,9 @@ function addSwipeListeners(elId) {
     let container = document.getElementById(elId);
     if (!container) return;
     container.querySelectorAll('.swipe-card').forEach(card => {
-        let startX = 0, currentX = 0;
+        let startX = 0, currentX = 0, moved = false;
         let bgLeft, bgRight;
 
-        // Создаём фоновые подложки
         bgLeft = document.createElement('div');
         bgLeft.className = 'swipe-bg swipe-bg-left';
         bgLeft.textContent = '✅';
@@ -152,13 +151,17 @@ function addSwipeListeners(elId) {
 
         card.addEventListener('touchstart', function(e) {
             startX = e.touches[0].clientX;
+            currentX = startX;
+            moved = false;
             card.style.transition = 'none';
         });
 
         card.addEventListener('touchmove', function(e) {
+            e.preventDefault();
             currentX = e.touches[0].clientX;
             let diff = currentX - startX;
-            if (Math.abs(diff) > 20) {
+            if (Math.abs(diff) > 10) {
+                moved = true;
                 card.style.transform = `translateX(${diff}px)`;
                 if (diff > 0) {
                     bgLeft.classList.add('show');
@@ -168,24 +171,28 @@ function addSwipeListeners(elId) {
                     bgLeft.classList.remove('show');
                 }
             }
-        });
+        }, { passive: false });
 
-        card.addEventListener('touchend', function(e) {
+        card.addEventListener('touchend', function() {
             let diff = currentX - startX;
             card.style.transition = 'transform 0.2s ease';
             card.style.transform = '';
             bgLeft.classList.remove('show');
             bgRight.classList.remove('show');
 
+            if (!moved || Math.abs(diff) < 80) return;
+
             let id = parseInt(card.dataset.id);
-            if (Math.abs(diff) > 80) {
-                if (diff > 0) window.completeRecord(id);
-                else window.cancelRecord(id);
+            if (diff > 0) {
+                if (confirm('✅ Подтвердить выполнение?')) {
+                    window.completeRecord(id);
+                }
+            } else {
+                window.cancelRecord(id); // внутри уже есть confirm
             }
         });
     });
 }
-
 // ===== КЛИЕНТЫ =====
 export function renderClients() {
     let s = document.getElementById('clientSearch').value.toLowerCase();
