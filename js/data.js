@@ -39,7 +39,10 @@ export function clientPhone(id) {
 }
 
 export function todayStr() {
-    return new Date().toISOString().slice(0, 10);
+    let d = new Date();
+    return d.getFullYear() + '-' + 
+        (''+(d.getMonth()+1)).padStart(2,'0') + '-' + 
+        (''+d.getDate()).padStart(2,'0');
 }
 
 export function daysSince(d) {

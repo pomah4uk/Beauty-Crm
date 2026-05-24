@@ -50,9 +50,34 @@ body.dark .day-total { border-top-color: #3b4a54; }
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     font-size: .85rem;
     font-weight: 600;
-    background: #ff1515;
 }
 body.dark .nav-back .btn {
     border-color: #3b4a54;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.nav-back .btn-danger {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+}
+
+/* Переключатель вида записей */
+#recordsViewTabs .small-btn.active {
+    background: #2c3e50;
+    color: #fff;
+}
+body.dark #recordsViewTabs .small-btn.active {
+    background: #3498db;
+}
+
+/* Плитки записей */
+.records-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.records-grid .swipe-card {
+    flex: 1;
+    min-width: 140px;
+    max-width: 200px;
 }

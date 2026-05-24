@@ -81,8 +81,14 @@
 
 <!-- АКТИВНЫЕ ЗАПИСИ -->
 <div id="pageRecords" class="hidden">
-    <input class="search-box" id="recordsSearch" placeholder="🔍 Поиск">
-    <button id="addRecordBtn2" class="btn btn-success">📝 Запись клиента</button>
+    <div class="flex gap12 mb12" style="align-items:center">
+        <input class="search-box" id="recordsSearch" placeholder="🔍 Поиск" style="margin:0;flex:1">
+        <button id="addRecordBtn2" class="btn btn-success" style="width:auto;margin:0;white-space:nowrap">📝 Запись</button>
+    </div>
+    <div class="flex gap12 mb12" id="recordsViewTabs">
+        <button class="small-btn active" data-view="list">📋 Список</button>
+        <button class="small-btn" data-view="grid">🗂️ Плитки</button>
+    </div>
     <div id="recordsList"></div>
 </div>
 
@@ -263,7 +269,7 @@
 
 <!-- КНОПКА НАЗАД -->
 <div class="nav-back" id="navBack" style="display:none">
-    <button class="btn" onclick="window.goHome()">← Назад</button>
+    <button class="btn btn-danger" onclick="window.goHome()">← Назад</button>
 </div>
 
 <script type="module" src="js/app.js?v=6"></script>

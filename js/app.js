@@ -14,6 +14,7 @@ import {
 } from './modals.js?v=7';
 import { callPhone } from './utils.js?v=7';
 import { initTheme } from './theme.js?v=7';
+import { setRecordsView } from './render/records.js?v=7';
 
 // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
 window.callPhone = callPhone;
@@ -59,6 +60,13 @@ document.querySelectorAll('#pageDashboard .dash-stat[data-nav]').forEach(el => {
         else if (n === 'expenses') setPage('expenses');
         else if (n === 'services') setPage('services');
         else if (n === 'stats') setPage('stats');
+    };
+});
+
+// ===== ПЕРЕКЛЮЧАТЕЛЬ ВИДА ЗАПИСЕЙ =====
+document.querySelectorAll('#recordsViewTabs .small-btn').forEach(tab => {
+    tab.onclick = function() {
+        setRecordsView(this.dataset.view);
     };
 });
 

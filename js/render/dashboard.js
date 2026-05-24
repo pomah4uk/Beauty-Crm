@@ -33,7 +33,7 @@ export function renderDashboard() {
     let periodLabel;
     
     if (currentPeriod === 'day') {
-        let dateStr = n.toISOString().slice(0, 10);
+        let dateStr = n.getFullYear() + '-' + (''+(n.getMonth()+1)).padStart(2,'0') + '-' + (''+n.getDate()).padStart(2,'0');
         periodRecords = data.records.filter(r => r.status === 'completed' && r.date === dateStr);
         periodLabel = n.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     } else if (currentPeriod === 'month') {
@@ -48,7 +48,8 @@ export function renderDashboard() {
     
     let exp;
     if (currentPeriod === 'day') {
-        exp = data.expenses.filter(e => e.date === n.toISOString().slice(0, 10)).reduce((s, e) => s + e.amount, 0);
+        let dateStr = n.getFullYear() + '-' + (''+(n.getMonth()+1)).padStart(2,'0') + '-' + (''+n.getDate()).padStart(2,'0');
+        exp = data.expenses.filter(e => e.date === dateStr).reduce((s, e) => s + e.amount, 0);
     } else if (currentPeriod === 'month') {
         exp = monthExp(m, y);
     } else {
@@ -57,7 +58,8 @@ export function renderDashboard() {
     
     let canc;
     if (currentPeriod === 'day') {
-        canc = data.records.filter(r => r.status === 'cancelled' && r.date === n.toISOString().slice(0, 10)).length;
+        let dateStr = n.getFullYear() + '-' + (''+(n.getMonth()+1)).padStart(2,'0') + '-' + (''+n.getDate()).padStart(2,'0');
+        canc = data.records.filter(r => r.status === 'cancelled' && r.date === dateStr).length;
     } else if (currentPeriod === 'month') {
         canc = data.records.filter(r => r.status === 'cancelled' && r.date && new Date(r.date).getMonth() === m && new Date(r.date).getFullYear() === y).length;
     } else {
@@ -74,12 +76,15 @@ export function renderDashboard() {
 
     // Календарь сегодня/завтра
     let today = todayStr();
-    let tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-    let tomorrowStr = tomorrow.toISOString().slice(0, 10);
+    let tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    let tomorrowStr = tomorrow.getFullYear() + '-' + 
+        (''+(tomorrow.getMonth()+1)).padStart(2,'0') + '-' + 
+        (''+tomorrow.getDate()).padStart(2,'0');
     document.getElementById('todayDate').innerText = today;
     document.getElementById('tomorrowDate').innerText = tomorrowStr;
-    let todayRecords = data.records.filter(r => r.status === 'active' && r.date === today);
-    let tomorrowRecords = data.records.filter(r => r.status === 'active' && r.date === tomorrowStr);
+    let todayRecords = data.records.filter(r => r.status === 'active' && r.date === today).sort((a, b) => (a.time||'12:00').localeCompare(b.time||'12:00'));
+    let tomorrowRecords = data.records.filter(r => r.status === 'active' && r.date === tomorrowStr).sort((a, b) => (a.time||'12:00').localeCompare(b.time||'12:00'));
 
     function renderCal(list, elId) {
         let h = '';
