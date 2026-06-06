@@ -1,17 +1,22 @@
 /* ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===== */
 :root {
-    --bg: #f1f2f6;
-    --card: #fff;
-    --text: #1e272e;
-    --sub: #555;
-    --br: 14px;
+    --bg: #e8f0fe;
+    --card: #ffffff;
+    --text: #1e3a5f;
+    --sub: #5a7a9f;
+    --br: 18px;
     --pad: 12px;
+    --accent: #3b6df0;
+    --gold: #f5a623;
+    --green: #27ae60;
+    --shadow: rgba(59, 109, 240, 0.08);
 }
 body.dark {
-    --bg: #1e272e;
-    --card: #2f3a42;
-    --text: #d2dae2;
-    --sub: #aaa;
+    --bg: #1a2740;
+    --card: #1e3050;
+    --text: #d0ddf0;
+    --sub: #7a9cc0;
+    --shadow: rgba(0, 0, 0, 0.3);
 }
 * {
     margin: 0;
@@ -29,12 +34,13 @@ body {
     font-family: system-ui;
     background: var(--bg);
     color: var(--text);
-    padding: 12px 12px 80px;
+    padding: 12px 12px 90px;
     transition: .3s;
 }
 h1 {
     font-size: 1.5rem;
     margin-bottom: 8px;
+    font-weight: 700;
 }
 .flex { display: flex; gap: 8px; }
 .wrap { flex-wrap: wrap; }

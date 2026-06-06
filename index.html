@@ -272,20 +272,6 @@
     <button class="btn btn-danger" onclick="window.goHome()">← Назад</button>
 </div>
 
-<div id="visits" style="position:fixed;bottom:5px;right:5px;font-size:.6rem;opacity:.3;z-index:999">👁 0</div>
-<script>
-if (!localStorage.getItem('visited')) {
-    localStorage.setItem('visited', 'true');
-    fetch('https://api.countapi.xyz/hit/pomah4uk-crm/visits')
-    .then(r => r.json())
-    .then(d => document.getElementById('visits').innerText = '👁 ' + d.value);
-} else {
-    fetch('https://api.countapi.xyz/get/pomah4uk-crm/visits')
-    .then(r => r.json())
-    .then(d => document.getElementById('visits').innerText = '👁 ' + d.value);
-}
-</script>
-
 <script type="module" src="js/app.js?v=6"></script>
 </body>
 </html>

@@ -7,52 +7,76 @@
 }
 .btn {
     width: 100%;
-    padding: var(--pad);
+    padding: 10px;
     border-radius: var(--br);
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    font-size: .9rem;
+    transition: transform .15s, box-shadow .2s;
 }
-.btn-primary { background: #2c3e50; color: #fff; }
-.btn-success { background: #27ae60; color: #fff; }
-.btn-danger { background: #e74c3c; color: #fff; }
-.btn-orange { background: #e67e22; color: #fff; }
+.btn:active {
+    transform: scale(.96);
+}
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(233,69,96,0.3);
+}
+.btn-success {
+    background: var(--green);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(46,204,113,0.3);
+}
+.btn-danger {
+    background: #c0392b;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(192,57,43,0.3);
+}
+.btn-orange {
+    background: var(--gold);
+    color: #1a1a2e;
+    box-shadow: 0 4px 15px rgba(245,197,24,0.3);
+}
 .small-btn {
-    background: #ecf0f1;
-    padding: 6px 14px;
-    border-radius: 30px;
-    font-size: .75rem;
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: .7rem;
 }
 body.dark .small-btn {
-    background: #3b4a54;
-    color: #fff;
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
 }
 .home-btn {
-    background: #ecf0f1;
+    background: rgba(255,255,255,0.06);
     border: none;
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-size: .8rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: .75rem;
     cursor: pointer;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    color: var(--text);
 }
 body.dark .home-btn {
-    background: #3b4a54;
-    color: #fff;
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
 }
 .copy-btn,
 .call-btn {
     border: none;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: .7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: .65rem;
     cursor: pointer;
     color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 .copy-btn { background: #3498db; }
-.call-btn { background: #27ae60; }
+.call-btn { background: var(--green); }
 .link-btn {
     background: none;
     border: none;
-    color: #3498db;
+    color: var(--accent);
     cursor: pointer;
-    font-size: .8rem;
+    font-size: .75rem;
 }
