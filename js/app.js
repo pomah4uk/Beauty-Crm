@@ -101,16 +101,17 @@ document.getElementById('inactiveTitle').onclick = function(e) {
 // ===== Ссылка =====
 
 document.getElementById('shareHeaderBtn').onclick = async () => {
+    let link = 'https://pomah4uk.github.io/Beauty-Crm/booking.html';
     if (navigator.share) {
         try {
             await navigator.share({
-                title: 'CRM Мастер',
-                text: 'Учёт клиентов, записей и расходов. Работает офлайн.',
-                url: window.location.href
+                title: 'Красивые губы',
+                text: 'Ждут тебя здесь!!!',
+                url: link
             });
         } catch(e) {}
     } else {
-        navigator.clipboard.writeText(window.location.href)
+        navigator.clipboard.writeText(link)
             .then(() => toast('📋 Ссылка скопирована'))
             .catch(() => {});
     }
