@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ирина — Запись</title>
+    <style>
+        :root {
+            --bg: #fdf2f4;
+            --card: #fff;
+            --text: #2d1b2e;
+            --sub: #8e6b7a;
+            --accent: #d4788c;
+            --gold: #c9975a;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 24px; }
+        .header h1 { font-size: 1.8rem; font-weight: 300; letter-spacing: 2px; color: var(--accent); }
+        .header p { color: var(--sub); font-size: 0.9rem; margin-top: 4px; }
+        .card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .card h3 { font-size: 1rem; margin-bottom: 8px; color: var(--accent); }
+        .service-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f5e8ec; font-size: 0.9rem; }
+        .service-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+        .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; font-size: 1rem; text-align: center; margin-bottom: 8px; transition: transform .15s; text-decoration: none; color: #fff; }
+        .btn:active { transform: scale(.97); }
+        .btn-wa { background: #25D366; }
+        .btn-tg { background: #2AABEE; }
+        .btn-max { background: #7B68EE; }
+        .btn-call { background: var(--accent); }
+        .btn-share { background: var(--card); color: var(--text); border: 1px solid #e0d6db; }
+        .footer { text-align: center; color: var(--sub); font-size: 0.75rem; margin-top: 24px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Ирина - косметолог</h1>
+        <p>Косметология • Эстетика • Забота</p>
+    </div>
+
+    <div class="card">
+        <h3>💋 Услуги и цены</h3>
+        <div class="service-row"><span><span class="service-dot" style="background:#e74c3c"></span>Увеличение губ</span><span>4 500 ₽</span></div>
+        <div class="service-row"><span><span class="service-dot" style="background:#f39c12"></span>Увеличение губ 0.5</span><span>2 500 ₽</span></div>
+        <div class="service-row"><span><span class="service-dot" style="background:#3498db"></span>Носогубки</span><span>3 000 ₽</span></div>
+        <div class="service-row"><span><span class="service-dot" style="background:#27ae60"></span>Биоревитализация</span><span>4 000 ₽</span></div>
+        <div class="service-row"><span><span class="service-dot" style="background:#9b59b6"></span>Липолитики</span><span>5 000 ₽</span></div>
+        <div class="service-row"><span><span class="service-dot" style="background:#1abc9c"></span>Консультация (часовая)</span><span>500 ₽</span></div>
+        <div class="service-row"><span><span class="service-dot" style="background:#95a5a6"></span>Консультация (быстрая)</span><span>Бесплатно</span></div>
+    </div>
+
+    <a class="btn btn-wa" href="https://wa.me/79234128169?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D0%B4%D1%83%D1%80%D1%83." target="_blank">💬 Записаться в WhatsApp</a>
+    <a class="btn btn-tg" href="https://t.me/Salikhova_Irina" target="_blank">✈️ Записаться в Telegram</a>
+    <a class="btn btn-max" href="https://vk.me/irina_salikhova" target="_blank">💬 Записаться в VK Max</a>
+    <a class="btn btn-call" href="tel:+79234128169">📞 Позвонить</a>
+    <button class="btn btn-share" id="shareBtn">🔗 Поделиться</button>
+
+    <div class="footer">
+        г. Томск<br>
+        Работаем: Пн-Сб 10:00–20:00
+    </div>
+</div>
+
+<script>
+document.getElementById('shareBtn').onclick = async () => {
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'Ирина — Косметология',
+                text: 'Косметология • Эстетика • Забота. Запись онлайн:',
+                url: window.location.href
+            });
+        } catch(e) {}
+    } else {
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => alert('📋 Ссылка скопирована!'))
+            .catch(() => alert('Ссылка: ' + window.location.href));
+    }
+};
+</script>
+</body>
+</html>

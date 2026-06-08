@@ -98,6 +98,24 @@ document.getElementById('inactiveTitle').onclick = function(e) {
     openInactiveModal();
 };
 
+// ===== Ссылка =====
+
+document.getElementById('shareHeaderBtn').onclick = async () => {
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'CRM Мастер',
+                text: 'Учёт клиентов, записей и расходов. Работает офлайн.',
+                url: window.location.href
+            });
+        } catch(e) {}
+    } else {
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => toast('📋 Ссылка скопирована'))
+            .catch(() => {});
+    }
+};
+
 // ===== БЭКАП =====
 document.getElementById('backupHeaderBtn').onclick = function() {
     setPage('backup');
