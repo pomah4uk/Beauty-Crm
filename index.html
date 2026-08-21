@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="CRM Мастер">
     <meta name="theme-color" content="#f1f2f6">
-    <link rel="stylesheet" href="css/style.css?v=6">
+    <link rel="stylesheet" href="css/style.css?v=7">
     <title>CRM Мастер</title>
 </head>
 <body>
@@ -148,31 +148,38 @@
     <div class="modal-content" style="padding:16px">
         <h3 style="margin-bottom:12px">📝 Новая запись</h3>
 
+        <!-- Клиент -->
         <div style="position:relative;margin-bottom:8px">
             <input class="modal-input" id="clientSearchInput" placeholder="🔍 Имя или телефон" autocomplete="off" style="margin-bottom:0;padding-right:40px">
             <button id="addClientFastBtn" style="position:absolute;right:4px;top:4px;width:36px;height:36px;border:none;background:var(--accent);color:#fff;border-radius:10px;font-size:1.2rem;cursor:pointer">+</button>
         </div>
         <div id="clientDropdown" class="hidden" style="background:var(--card);border-radius:14px;margin-bottom:8px;max-height:120px;overflow-y:auto;border:1px solid var(--border)"></div>
-
         <div id="newClientFields" class="hidden">
             <input class="modal-input" id="newClientPhone" placeholder="📞 Телефон" type="text" style="margin-bottom:6px">
         </div>
-
         <div class="flex mb8" id="callLinkRow" style="display:none">
             <span style="font-size:.85rem">📞</span><a id="callClientLink" href="#" style="color:var(--green);text-decoration:none;font-size:.8rem">Позвонить</a>
         </div>
 
+        <!-- Дата и время -->
         <div class="flex gap8" style="margin-bottom:8px">
             <input type="date" class="modal-input" id="recordDate" style="margin-bottom:0;flex:1">
             <input type="time" class="modal-input" id="recordTime" value="12:00" style="margin-bottom:0;width:90px;flex-shrink:0">
         </div>
         <div class="modal-hint">Только сегодня или будущая дата</div>
 
+        <!-- Услуги с поиском -->
         <div id="servicesContainer" style="margin-bottom:4px"></div>
-        <button id="addServiceRowBtn" class="small-btn mb8" style="width:100%">+ Добавить услугу</button>
+        <div style="position:relative;margin-bottom:8px">
+            <input class="modal-input" id="serviceSearchInput" placeholder="🔍 Поиск услуги" autocomplete="off" style="margin-bottom:0">
+            <button id="addServiceFastBtn" style="position:absolute;right:4px;top:4px;width:36px;height:36px;border:none;background:var(--accent);color:#fff;border-radius:10px;font-size:1.2rem;cursor:pointer">+</button>
+        </div>
+        <div id="serviceDropdown" class="hidden" style="background:var(--card);border-radius:14px;margin-bottom:8px;max-height:120px;overflow-y:auto;border:1px solid var(--border)"></div>
 
+        <!-- Сумма -->
         <div class="total-display">Общая сумма: <span id="recordPrice">0</span>₽</div>
 
+        <!-- Комментарий к заказу -->
         <label class="modal-label">Комментарий к заказу</label>
         <textarea class="modal-input" id="recordComment" placeholder="Любая заметка" rows="2" style="margin-bottom:6px"></textarea>
 
@@ -244,6 +251,6 @@
     <button id="addExpenseBtn" class="btn btn-orange" style="flex:1;margin:0">💸 Расход</button>
 </div>
 
-<script type="module" src="js/app.js?v=6"></script>
+<script type="module" src="js/app.js?v=7"></script>
 </body>
 </html>

@@ -14,7 +14,8 @@ export function openClientModal() {
     editClientId = null;
     document.getElementById('clientName').value = '';
     document.getElementById('clientPhone').value = '';
-    document.getElementById('clientComment').value = '';
+    let commentField = document.getElementById('clientComment');
+    if (commentField) commentField.value = '';
     document.getElementById('clientModalTitle').innerText = '➕ Клиент';
     show('clientModal');
 }
@@ -26,7 +27,6 @@ document.getElementById('saveClientBtn').onclick = function() {
         id: editClientId || nextId(data.clients),
         name,
         phone: document.getElementById('clientPhone').value,
-        birth: document.getElementById('clientBirth')?.value || '',
         lastDate: '',
         lastService: ''
     };
@@ -66,6 +66,8 @@ export function openRecordModal(clientId) {
     document.getElementById('recordTime').value = '12:00';
 
     document.getElementById('servicesContainer').innerHTML = '';
+    document.getElementById('serviceSearchInput').value = '';
+    document.getElementById('serviceDropdown').classList.add('hidden');
     document.getElementById('recordComment').value = '';
 
     if (clientId) {
@@ -118,6 +120,112 @@ document.getElementById('clientSearchInput').addEventListener('input', function(
     }
 });
 
+// Поиск услуги по названию
+document.getElementById('serviceSearchInput').addEventListener('input', function() {
+    let val = this.value.trim().toLowerCase();
+    let dropdown = document.getElementById('serviceDropdown');
+
+    if (!val) {
+        dropdown.classList.add('hidden');
+        return;
+    }
+
+    let matches = data.services.filter(s => s.name.toLowerCase().includes(val)).slice(0, 5);
+
+    if (matches.length === 0) {
+        dropdown.classList.add('hidden');
+    } else {
+        let h = '';
+        matches.forEach(s => {
+            h += `<div class="service-option" data-id="${s.id}" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f3f7"
+                onmousedown="event.preventDefault(); window.addServiceToRecord(${s.id});">
+                <span style="font-weight:600">${s.name}</span>
+                <span style="font-size:.75rem;color:#999;float:right">${s.price ? s.price + ' ₽' : ''}</span>
+            </div>`;
+        });
+        dropdown.innerHTML = h;
+        dropdown.classList.remove('hidden');
+    }
+});
+
+window.addServiceToRecord = function(serviceId) {
+    let s = data.services.find(x => x.id === serviceId);
+    if (!s) return;
+
+    selectedServices.push({ id: s.id, name: s.name, price: s.price });
+
+    document.getElementById('serviceDropdown').classList.add('hidden');
+    document.getElementById('serviceSearchInput').value = '';
+
+    renderSelectedServices();
+    updateTotal();
+};
+
+function renderSelectedServices() {
+    let container = document.getElementById('servicesContainer');
+    let h = '';
+    selectedServices.forEach((s, index) => {
+        h += `<div class="service-row" style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <span style="flex:1;font-size:.85rem;">${s.name} (${s.price}₽)</span>
+            <button class="small-btn" style="flex-shrink:0;" onclick="window.removeServiceFromRecord(${index})">✕</button>
+        </div>`;
+    });
+    container.innerHTML = h;
+}
+
+window.removeServiceFromRecord = function(index) {
+    selectedServices.splice(index, 1);
+    renderSelectedServices();
+    updateTotal();
+};
+
+document.getElementById('addServiceFastBtn').onclick = function() {
+    let input = document.getElementById('serviceSearchInput');
+    let val = input.value.trim();
+    if (!val) { alertModal('Введите название услуги'); return; }
+
+    let newService = {
+        id: nextId(data.services),
+        name: val,
+        price: 0,
+        color: '#3498db'
+    };
+    data.services.push(newService);
+    save();
+
+    selectedServices.push({ id: newService.id, name: newService.name, price: newService.price });
+
+    input.value = '';
+    document.getElementById('serviceDropdown').classList.add('hidden');
+
+    renderSelectedServices();
+    updateTotal();
+};
+
+// Быстрое добавление клиента
+document.getElementById('addClientFastBtn').onclick = function() {
+    let input = document.getElementById('clientSearchInput');
+    let name = input.value.trim();
+    if (!name) { alertModal('Введите имя клиента'); return; }
+
+    let newClient = {
+        id: nextId(data.clients),
+        name: name,
+        phone: '',
+        lastDate: '',
+        lastService: ''
+    };
+    data.clients.push(newClient);
+    save();
+
+    selectedClientId = newClient.id;
+    document.getElementById('clientDropdown').classList.add('hidden');
+    document.getElementById('newClientFields').classList.add('hidden');
+    document.getElementById('callLinkRow').style.display = 'none';
+
+    updateCallLink();
+};
+
 window._selectedClientId = null;
 window._updateCallLink = function() {
     selectedClientId = window._selectedClientId;
@@ -127,6 +235,7 @@ window._updateCallLink = function() {
 document.addEventListener('click', function(e) {
     if (!e.target.closest('#recordModal')) {
         document.getElementById('clientDropdown').classList.add('hidden');
+        document.getElementById('serviceDropdown').classList.add('hidden');
     }
 });
 
@@ -142,52 +251,13 @@ function updateCallLink() {
     }
 }
 
-function addServiceRow(name, price) {
-    let container = document.getElementById('servicesContainer');
-    let row = document.createElement('div');
-    row.className = 'service-row';
-
-    let sel = document.createElement('select');
-    sel.className = 'modal-select';
-    sel.style.marginBottom = '0';
-
-    data.services.forEach(v => {
-        let o = document.createElement('option');
-        o.value = v.name;
-        o.textContent = v.name + (v.price ? ` (${v.price}₽)` : '');
-        o.dataset.price = v.price || 0;
-        if (v.name === name) o.selected = true;
-        sel.appendChild(o);
-    });
-    sel.onchange = updateTotal;
-
-    let btn = document.createElement('button');
-    btn.className = 'small-btn';
-    btn.style.flexShrink = '0';
-    btn.textContent = '✕';
-    btn.onclick = function() {
-        row.remove();
-        updateTotal();
-    };
-
-    row.appendChild(sel);
-    row.appendChild(btn);
-    container.appendChild(row);
-    updateTotal();
-}
-
 function updateTotal() {
     let t = 0;
-    document.querySelectorAll('#servicesContainer select').forEach(s => {
-        let o = s.options[s.selectedIndex];
-        if (o && o.dataset.price) t += parseInt(o.dataset.price) || 0;
+    selectedServices.forEach(s => {
+        t += parseInt(s.price) || 0;
     });
-    document.getElementById('recordPrice').innerText = t + ' ₽';
+    document.getElementById('recordPrice').innerText = t;
 }
-
-document.getElementById('addServiceRowBtn').onclick = function() {
-    addServiceRow('');
-};
 
 document.getElementById('saveRecordBtn').onclick = function() {
     let cid = selectedClientId;
@@ -199,7 +269,6 @@ document.getElementById('saveRecordBtn').onclick = function() {
             id: nextId(data.clients),
             name: n,
             phone: document.getElementById('newClientPhone').value,
-            birth: '',
             lastDate: '',
             lastService: ''
         };
@@ -212,19 +281,14 @@ document.getElementById('saveRecordBtn').onclick = function() {
         return;
     }
 
-    let names = [];
-    document.querySelectorAll('#servicesContainer select').forEach(s => {
-        if (s.value) names.push(s.value);
-    });
+    if (selectedServices.length === 0) {
+        alertModal('Добавьте хотя бы одну услугу');
+        return;
+    }
 
-    if (!names.length) { alertModal('Выберите услугу'); return; }
-
+    let names = selectedServices.map(s => s.name);
+    let total = selectedServices.reduce((sum, s) => sum + (parseInt(s.price) || 0), 0);
     let timeVal = document.getElementById('recordTime').value || '12:00';
-    let total = 0;
-    document.querySelectorAll('#servicesContainer select').forEach(s => {
-        let o = s.options[s.selectedIndex];
-        if (o && o.dataset.price) total += parseInt(o.dataset.price) || 0;
-    });
 
     let r = {
         id: editRecordId || nextId(data.records),
@@ -248,11 +312,13 @@ document.getElementById('saveRecordBtn').onclick = function() {
     save();
     hide('recordModal');
     selectedClientId = null;
+    selectedServices = [];
 };
 
 document.getElementById('cancelRecordBtn').onclick = function() {
     editRecordId = null;
     selectedClientId = null;
+    selectedServices = [];
     hide('recordModal');
 };
 
@@ -274,17 +340,21 @@ export function editRecord(id) {
     document.getElementById('recordDate').setAttribute('min', todayStr());
     document.getElementById('recordTime').value = r.time || '12:00';
 
-    document.getElementById('servicesContainer').innerHTML = '';
-
+    selectedServices = [];
     let servicesList = (r.service || '').split(' + ').filter(s => s !== '—');
     servicesList.forEach(svc => {
         let service = data.services.find(s => s.name === svc);
-        addServiceRow(svc, service?.price || 0);
+        selectedServices.push({
+            id: service ? service.id : 0,
+            name: svc,
+            price: service ? service.price : 0
+        });
     });
+    renderSelectedServices();
+    updateTotal();
 
     document.getElementById('recordComment').value = r.comment || '';
 
-    updateTotal();
     editRecordId = id;
     show('recordModal');
 }
@@ -438,7 +508,6 @@ export function showClientStats(id) {
         <div class="card">
             <div class="card-row"><span>👤</span><span>${c.name}</span></div>
             <div class="card-row"><span>📞</span><span>${c.phone||'—'}</span></div>
-            <div class="card-row"><span>🎂</span><span>${c.birth||'—'}</span></div>
             <div class="card-row"><span>✅</span><span>${done}</span></div>
             <div class="card-row"><span>❌</span><span>${canc}</span></div>
             <div class="card-row"><span>📊</span><span>${t}</span></div>
@@ -468,7 +537,6 @@ document.getElementById('editClientFromStatsBtn').onclick = function() {
     hide('clientStatsModal');
     document.getElementById('clientName').value = c.name;
     document.getElementById('clientPhone').value = c.phone || '';
-    document.getElementById('clientComment').value = '';
     editClientId = statsClientId;
     document.getElementById('clientModalTitle').innerText = '✏️ Клиент';
     show('clientModal');
