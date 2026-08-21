@@ -166,12 +166,28 @@ function renderSelectedServices() {
     let h = '';
     selectedServices.forEach((s, index) => {
         h += `<div class="service-row" style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-            <span style="flex:1;font-size:.85rem;">${s.name} (${s.price}₽)</span>
+            <span style="flex:1;font-size:.85rem;">${s.name}</span>
+            <input type="number" value="${s.price}" 
+                style="width:80px;padding:6px;border:1px solid var(--border);border-radius:8px;text-align:center;font-size:.85rem;background:var(--card);color:var(--text);"
+                onchange="window.updateServicePrice(${index}, this.value)">
+            <span style="font-size:.8rem;color:var(--sub);">₽</span>
             <button class="small-btn" style="flex-shrink:0;" onclick="window.removeServiceFromRecord(${index})">✕</button>
         </div>`;
     });
     container.innerHTML = h;
 }
+
+window.updateServicePrice = function(index, newPrice) {
+    let price = parseInt(newPrice) || 0;
+    selectedServices[index].price = price;
+
+    let service = data.services.find(s => s.id === selectedServices[index].id);
+    if (service) {
+        service.price = price;
+    }
+
+    updateTotal();
+};
 
 window.removeServiceFromRecord = function(index) {
     selectedServices.splice(index, 1);
