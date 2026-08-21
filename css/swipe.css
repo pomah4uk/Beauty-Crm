@@ -30,10 +30,10 @@
     border-radius: 0 16px 16px 0;
 }
 .swipe-bg.show { opacity: 1; }
-.swipe-bg-green { background: #27ae60; }
-.swipe-bg-red { background: #e74c3c; }
+.swipe-bg-green { background: var(--green); }
+.swipe-bg-red { background: var(--red); }
 .swipe-bg-blue { background: #3498db; }
-.swipe-bg-orange { background: #f39c12; }
+.swipe-bg-orange { background: var(--gold); }
 
 #todayList, #tomorrowList, #recordsList, #historyList, #clientsList, #inactiveList, #expensesList, #servicesList {
     overflow: hidden;

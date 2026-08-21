@@ -1,4 +1,4 @@
-/* ===== ШАПКА И НАВИГАЦИЯ ===== */
+/* ===== ШАПКА ===== */
 .header {
     display: flex;
     align-items: center;
@@ -12,24 +12,32 @@
     font-size: 1.3rem;
     cursor: pointer;
     flex-shrink: 0;
-    margin-right: 15px;
+    margin-left: 12px;
 }
+
 .header-icon {
     background: none;
     border: none;
     font-size: 1.2rem;
     cursor: pointer;
     flex-shrink: 0;
-    margin-right: 4px;
+    margin-left: 4px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: background .15s;
 }
+.header-icon:active {
+    background: var(--border);
+}
+
 .bottom-link {
     text-align: center;
     margin-top: 20px;
     padding: var(--pad);
-    border-top: 1px solid #e0e4e8;
+    border-top: 1px solid var(--border);
 }
 .bottom-link a {
-    color: #3498db;
+    color: var(--accent);
     text-decoration: none;
     cursor: pointer;
 }

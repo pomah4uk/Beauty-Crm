@@ -26,7 +26,7 @@
     padding: var(--pad);
     margin-bottom: 10px;
     border-radius: var(--br);
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
     background: var(--card);
     color: var(--text);
     font-size: 1rem;
@@ -65,8 +65,8 @@
     border-radius: var(--br);
     text-align: center;
     margin-bottom: 10px;
-    border: 2px solid #27ae60;
-    color: #27ae60;
+    border: 2px solid var(--green);
+    color: var(--green);
 }
 .service-row {
     display: flex;

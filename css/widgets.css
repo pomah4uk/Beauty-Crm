@@ -15,7 +15,7 @@
     cursor: pointer;
     box-shadow: 0 4px 16px var(--shadow);
     transition: transform .15s, box-shadow .2s;
-    border: 1px solid rgba(59, 109, 240, 0.1);
+    border: 1px solid var(--border);
 }
 .dash-stat:active {
     transform: scale(.96);

@@ -3,7 +3,7 @@
 import { setPage, setOnPageChange } from './router.js?v=7';
 import { renderHistory } from './render/history.js';
 import { renderServices } from './render/services.js';
-import { setPeriod, shiftPeriod } from './render/dashboard.js';
+import { renderDashboard } from './render/dashboard.js';
 import { setStatsPeriod, shiftStatsPeriod } from './render/stats.js';
 import {
     openClientModal, openRecordModal, openExpenseModal, editExpense,
@@ -30,12 +30,19 @@ window.deleteService = deleteService;
 window.openRecordModal = openRecordModal;
 
 // ===== КНОПКИ =====
-document.getElementById('addRecordBtn').onclick = function() { openRecordModal(null); };
-document.getElementById('addRecordBtn2').onclick = function() { openRecordModal(null); };
-document.getElementById('addClientBtn2').onclick = openClientModal;
-document.getElementById('addExpenseBtn').onclick = openExpenseModal;
-document.getElementById('addExpenseBtn2').onclick = openExpenseModal;
-document.getElementById('addServiceBtn').onclick = openServiceModal;
+let btn;
+btn = document.getElementById('addRecordBtn');
+if (btn) btn.onclick = function() { openRecordModal(null); };
+btn = document.getElementById('addRecordBtn2');
+if (btn) btn.onclick = function() { openRecordModal(null); };
+btn = document.getElementById('addClientBtn2');
+if (btn) btn.onclick = openClientModal;
+btn = document.getElementById('addExpenseBtn');
+if (btn) btn.onclick = openExpenseModal;
+btn = document.getElementById('addExpenseBtn2');
+if (btn) btn.onclick = openExpenseModal;
+btn = document.getElementById('addServiceBtn');
+if (btn) btn.onclick = openServiceModal;
 
 // ===== ВИДЖЕТЫ =====
 document.querySelectorAll('#pageDashboard .dash-stat[data-nav]').forEach(el => {
@@ -71,36 +78,36 @@ document.querySelectorAll('#recordsViewTabs .small-btn').forEach(tab => {
 });
 
 // ===== ПОИСК =====
-document.getElementById('clientSearch').oninput = function() { setPage('clients'); };
-document.getElementById('recordsSearch').oninput = function() { setPage('records'); };
-document.getElementById('historySearch').oninput = function() { renderHistory(); };
+btn = document.getElementById('clientSearch');
+if (btn) btn.oninput = function() { setPage('clients'); };
+btn = document.getElementById('recordsSearch');
+if (btn) btn.oninput = function() { setPage('records'); };
+btn = document.getElementById('historySearch');
+if (btn) btn.oninput = function() { renderHistory(); };
+
 document.querySelectorAll('input[name="histFilter"]').forEach(r => {
     r.onchange = function() { renderHistory(); };
 });
-
-// ===== ПЕРИОД НА ГЛАВНОЙ =====
-document.querySelectorAll('#periodTabs .period-tab').forEach(tab => {
-    tab.onclick = function() { setPeriod(this.dataset.period); };
-});
-document.getElementById('periodPrev').onclick = function() { shiftPeriod(-1); };
-document.getElementById('periodNext').onclick = function() { shiftPeriod(1); };
 
 // ===== ПЕРИОД НА СТАТИСТИКЕ =====
 document.querySelectorAll('#statsPeriodTabs .period-tab').forEach(tab => {
     tab.onclick = function() { setStatsPeriod(this.dataset.period); };
 });
-document.getElementById('statsPeriodPrev').onclick = function() { shiftStatsPeriod(-1); };
-document.getElementById('statsPeriodNext').onclick = function() { shiftStatsPeriod(1); };
+btn = document.getElementById('statsPeriodPrev');
+if (btn) btn.onclick = function() { shiftStatsPeriod(-1); };
+btn = document.getElementById('statsPeriodNext');
+if (btn) btn.onclick = function() { shiftStatsPeriod(1); };
 
 // ===== ДАВНО НЕ ЗАХОДИЛИ =====
-document.getElementById('inactiveTitle').onclick = function(e) {
+btn = document.getElementById('inactiveTitle');
+if (btn) btn.onclick = function(e) {
     e.stopPropagation();
     openInactiveModal();
 };
 
-// ===== Ссылка =====
-
-document.getElementById('shareHeaderBtn').onclick = async () => {
+// ===== ССЫЛКА =====
+btn = document.getElementById('shareHeaderBtn');
+if (btn) btn.onclick = async function() {
     let link = 'https://pomah4uk.github.io/Beauty-Crm/booking.html';
     if (navigator.share) {
         try {
@@ -118,23 +125,22 @@ document.getElementById('shareHeaderBtn').onclick = async () => {
 };
 
 // ===== БЭКАП =====
-document.getElementById('backupHeaderBtn').onclick = function() {
-    setPage('backup');
-};
-document.getElementById('exportBtn').onclick = exportData;
-document.getElementById('importBtn').onclick = function() {
-    document.getElementById('importFile').click();
-};
-document.getElementById('importFile').onchange = function(e) {
+btn = document.getElementById('backupHeaderBtn');
+if (btn) btn.onclick = function() { setPage('backup'); };
+btn = document.getElementById('exportBtn');
+if (btn) btn.onclick = exportData;
+btn = document.getElementById('importBtn');
+if (btn) btn.onclick = function() { document.getElementById('importFile').click(); };
+btn = document.getElementById('importFile');
+if (btn) btn.onchange = function(e) {
     let f = e.target.files[0];
     if (f) {
         importData(f);
         e.target.value = '';
     }
 };
-document.getElementById('resetBtn').onclick = function() {
-    resetData();
-};
+btn = document.getElementById('resetBtn');
+if (btn) btn.onclick = function() { resetData(); };
 
 // ===== ЗАКРЫТИЕ МОДАЛОК =====
 document.querySelectorAll('.modal').forEach(modal => {
@@ -156,6 +162,15 @@ setOnPageChange(updateNavBack);
 
 window.goHome = function() {
     setPage('dashboard');
+};
+
+// ===== TOAST =====
+window.toast = function(msg) {
+    let t = document.createElement('div');
+    t.className = 'toast';
+    t.innerText = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2000);
 };
 
 // ===== КНОПКА ВВЕРХ =====

@@ -13,6 +13,18 @@ export let data = JSON.parse(localStorage.getItem('data')) || {
     inactiveDays: 30
 };
 
+export let settings = JSON.parse(localStorage.getItem('crm_settings')) || {
+    objectLabel: 'Клиент',
+    objectLabelPlural: 'Клиенты',
+    workLabel: 'Запись',
+    workLabelButton: '📝 Запись клиента',
+    currency: '₽'
+};
+
+export function saveSettings() {
+    localStorage.setItem('crm_settings', JSON.stringify(settings));
+}
+
 const listeners = [];
 
 export function onDataChange(fn) {

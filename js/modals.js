@@ -14,7 +14,6 @@ export function openClientModal() {
     editClientId = null;
     document.getElementById('clientName').value = '';
     document.getElementById('clientPhone').value = '';
-    document.getElementById('clientBirth').value = '';
     document.getElementById('clientComment').value = '';
     document.getElementById('clientModalTitle').innerText = '➕ Клиент';
     show('clientModal');
@@ -27,8 +26,7 @@ document.getElementById('saveClientBtn').onclick = function() {
         id: editClientId || nextId(data.clients),
         name,
         phone: document.getElementById('clientPhone').value,
-        birth: document.getElementById('clientBirth').value,
-        comment: document.getElementById('clientComment').value || '',
+        birth: document.getElementById('clientBirth')?.value || '',
         lastDate: '',
         lastService: ''
     };
@@ -48,72 +46,68 @@ document.getElementById('cancelClientBtn').onclick = function() {
 
 // ===== МОДАЛКА ЗАПИСИ =====
 let selectedClientId = null;
+let selectedServices = [];
 
 export function openRecordModal(clientId) {
     editRecordId = null;
-    
+    selectedServices = [];
+
     let searchInput = document.getElementById('clientSearchInput');
     searchInput.value = clientId ? (data.clients.find(c => c.id === clientId)?.name || '') : '';
     selectedClientId = clientId || null;
-    
+
     document.getElementById('clientDropdown').classList.add('hidden');
     document.getElementById('newClientFields').classList.add('hidden');
     document.getElementById('callLinkRow').style.display = clientId ? 'flex' : 'none';
     document.getElementById('newClientPhone').value = '';
-    document.getElementById('newClientBirth').value = '';
+
     document.getElementById('recordDate').value = todayStr();
     document.getElementById('recordDate').setAttribute('min', todayStr());
     document.getElementById('recordTime').value = '12:00';
+
     document.getElementById('servicesContainer').innerHTML = '';
-    addServiceRow('');
-    updateTotal();
-    document.getElementById('recordPreparat').value = '';
     document.getElementById('recordComment').value = '';
-    
+
     if (clientId) {
         updateCallLink();
-        let c = data.clients.find(x => x.id === clientId);
-        if (c && c.comment) {
-            document.getElementById('recordComment').value = c.comment;
-        }
     }
-    
+
+    updateTotal();
     show('recordModal');
-    setTimeout(() => searchInput.focus(), 200);
 }
 
-// Поиск клиента при вводе
+// Поиск клиента по имени ИЛИ телефону
 document.getElementById('clientSearchInput').addEventListener('input', function() {
     let val = this.value.trim().toLowerCase();
     let dropdown = document.getElementById('clientDropdown');
-    
+
     if (!val) {
         dropdown.classList.add('hidden');
         document.getElementById('newClientFields').classList.add('hidden');
         return;
     }
-    
-    let matches = data.clients.filter(c => c.name.toLowerCase().includes(val)).slice(0, 5);
-    
+
+    let matches = data.clients.filter(c =>
+        c.name.toLowerCase().includes(val) ||
+        (c.phone && c.phone.includes(val))
+    ).slice(0, 5);
+
     if (matches.length === 0) {
         dropdown.classList.add('hidden');
         document.getElementById('newClientFields').classList.remove('hidden');
         selectedClientId = null;
         document.getElementById('callLinkRow').style.display = 'none';
-        document.getElementById('recordComment').value = '';
     } else {
         document.getElementById('newClientFields').classList.add('hidden');
         let h = '';
         matches.forEach(c => {
-            let commentEscaped = (c.comment || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            h += `<div class="client-option" data-id="${c.id}" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f3f7" 
-                onmousedown="event.preventDefault(); 
-                document.getElementById('clientSearchInput').value='${c.name.replace(/'/g, "\\'")}'; 
-                document.getElementById('clientDropdown').classList.add('hidden'); 
-                document.getElementById('newClientFields').classList.add('hidden'); 
-                document.getElementById('callLinkRow').style.display='flex'; 
-                window._selectedClientId=${c.id}; 
-                document.getElementById('recordComment').value='${commentEscaped}';
+            h += `<div class="client-option" data-id="${c.id}" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f3f7"
+                onmousedown="event.preventDefault();
+                document.getElementById('clientSearchInput').value='${c.name.replace(/'/g, "\\'")}';
+                document.getElementById('clientDropdown').classList.add('hidden');
+                document.getElementById('newClientFields').classList.add('hidden');
+                document.getElementById('callLinkRow').style.display='flex';
+                window._selectedClientId=${c.id};
                 window._updateCallLink();">
                 <span style="font-weight:600">${c.name}</span>
                 <span style="font-size:.75rem;color:#999;float:right">${c.phone||''}</span>
@@ -124,14 +118,12 @@ document.getElementById('clientSearchInput').addEventListener('input', function(
     }
 });
 
-// Глобальные функции для выпадающего списка
 window._selectedClientId = null;
 window._updateCallLink = function() {
     selectedClientId = window._selectedClientId;
     updateCallLink();
 };
 
-// Скрываем выпадающий список при клике вне
 document.addEventListener('click', function(e) {
     if (!e.target.closest('#recordModal')) {
         document.getElementById('clientDropdown').classList.add('hidden');
@@ -150,7 +142,7 @@ function updateCallLink() {
     }
 }
 
-function addServiceRow(name) {
+function addServiceRow(name, price) {
     let container = document.getElementById('servicesContainer');
     let row = document.createElement('div');
     row.className = 'service-row';
@@ -190,8 +182,7 @@ function updateTotal() {
         let o = s.options[s.selectedIndex];
         if (o && o.dataset.price) t += parseInt(o.dataset.price) || 0;
     });
-    document.getElementById('recordPrice').value = t;
-    document.getElementById('recordTotalDisplay').innerText = t;
+    document.getElementById('recordPrice').innerText = t + ' ₽';
 }
 
 document.getElementById('addServiceRowBtn').onclick = function() {
@@ -200,7 +191,7 @@ document.getElementById('addServiceRowBtn').onclick = function() {
 
 document.getElementById('saveRecordBtn').onclick = function() {
     let cid = selectedClientId;
-    
+
     if (!cid) {
         let n = document.getElementById('clientSearchInput').value.trim();
         if (!n) { alertModal('Введите имя клиента'); return; }
@@ -208,18 +199,12 @@ document.getElementById('saveRecordBtn').onclick = function() {
             id: nextId(data.clients),
             name: n,
             phone: document.getElementById('newClientPhone').value,
-            birth: document.getElementById('newClientBirth').value,
+            birth: '',
             lastDate: '',
-            lastService: '',
-            comment: document.getElementById('recordComment').value || ''
+            lastService: ''
         };
         data.clients.push(c);
         cid = c.id;
-    } else {
-        let c = data.clients.find(x => x.id === cid);
-        if (c && document.getElementById('recordComment').value) {
-            c.comment = document.getElementById('recordComment').value;
-        }
     }
 
     if (document.getElementById('recordDate').value < todayStr()) {
@@ -231,17 +216,24 @@ document.getElementById('saveRecordBtn').onclick = function() {
     document.querySelectorAll('#servicesContainer select').forEach(s => {
         if (s.value) names.push(s.value);
     });
+
     if (!names.length) { alertModal('Выберите услугу'); return; }
 
     let timeVal = document.getElementById('recordTime').value || '12:00';
+    let total = 0;
+    document.querySelectorAll('#servicesContainer select').forEach(s => {
+        let o = s.options[s.selectedIndex];
+        if (o && o.dataset.price) total += parseInt(o.dataset.price) || 0;
+    });
+
     let r = {
         id: editRecordId || nextId(data.records),
         clientId: cid,
         date: document.getElementById('recordDate').value,
         time: timeVal,
         service: names.join(' + '),
-        price: parseInt(document.getElementById('recordPrice').value) || 0,
-        preparat: document.getElementById('recordPreparat').value || '',
+        price: total,
+        comment: document.getElementById('recordComment').value || '',
         status: 'active'
     };
 
@@ -271,24 +263,28 @@ export function editRecord(id) {
 
     selectedClientId = r.clientId;
     let c = data.clients.find(x => x.id === r.clientId);
+
     document.getElementById('clientSearchInput').value = c ? c.name : '';
     document.getElementById('clientDropdown').classList.add('hidden');
     document.getElementById('newClientFields').classList.add('hidden');
     document.getElementById('callLinkRow').style.display = 'flex';
     updateCallLink();
+
     document.getElementById('recordDate').value = r.date;
     document.getElementById('recordDate').setAttribute('min', todayStr());
     document.getElementById('recordTime').value = r.time || '12:00';
+
     document.getElementById('servicesContainer').innerHTML = '';
 
-    let servicesList = r.service.split(' + ');
-    servicesList.forEach(svc => addServiceRow(svc));
-    updateTotal();
-    document.getElementById('recordPrice').value = r.price;
-    document.getElementById('recordTotalDisplay').innerText = r.price;
-    document.getElementById('recordPreparat').value = r.preparat || '';
-    document.getElementById('recordComment').value = c?.comment || '';
+    let servicesList = (r.service || '').split(' + ').filter(s => s !== '—');
+    servicesList.forEach(svc => {
+        let service = data.services.find(s => s.name === svc);
+        addServiceRow(svc, service?.price || 0);
+    });
 
+    document.getElementById('recordComment').value = r.comment || '';
+
+    updateTotal();
     editRecordId = id;
     show('recordModal');
 }
@@ -338,7 +334,7 @@ export function editExpense(id) {
 document.getElementById('saveExpenseBtn').onclick = function() {
     let a = parseInt(document.getElementById('expenseAmount').value);
     if (!a || a <= 0) { alertModal('Введите сумму'); return; }
-    
+
     if (editExpenseId) {
         let e = data.expenses.find(x => x.id === editExpenseId);
         if (e) {
@@ -443,7 +439,6 @@ export function showClientStats(id) {
             <div class="card-row"><span>👤</span><span>${c.name}</span></div>
             <div class="card-row"><span>📞</span><span>${c.phone||'—'}</span></div>
             <div class="card-row"><span>🎂</span><span>${c.birth||'—'}</span></div>
-            <div class="card-row"><span>💬</span><span>${c.comment||'—'}</span></div>
             <div class="card-row"><span>✅</span><span>${done}</span></div>
             <div class="card-row"><span>❌</span><span>${canc}</span></div>
             <div class="card-row"><span>📊</span><span>${t}</span></div>
@@ -452,7 +447,7 @@ export function showClientStats(id) {
             <div class="card-row"><span>💰</span><span>${sum}₽</span></div>
         </div>`;
 
-    document.getElementById('clientStatsTitle').innerText = 'Статистика: ' + c.name;
+    document.getElementById('clientStatsTitle').innerText = c.name;
     show('clientStatsModal');
 }
 
@@ -473,8 +468,7 @@ document.getElementById('editClientFromStatsBtn').onclick = function() {
     hide('clientStatsModal');
     document.getElementById('clientName').value = c.name;
     document.getElementById('clientPhone').value = c.phone || '';
-    document.getElementById('clientBirth').value = c.birth || '';
-    document.getElementById('clientComment').value = c.comment || '';
+    document.getElementById('clientComment').value = '';
     editClientId = statsClientId;
     document.getElementById('clientModalTitle').innerText = '✏️ Клиент';
     show('clientModal');
@@ -533,7 +527,7 @@ export function importData(file) {
             data.clients = imported.clients || [];
             data.records = imported.records || [];
             data.expenses = imported.expenses || [];
-            data.services = imported.services || [{ id: 1, name: 'Консультация', price: 0, color: '#3498db' }];
+            data.services = imported.services || [];
             data.inactiveDays = imported.inactiveDays || 30;
             save();
             toast('✅ Восстановлено');
@@ -550,7 +544,7 @@ export async function resetData() {
         data.clients = [];
         data.records = [];
         data.expenses = [];
-        data.services = [{ id: 1, name: 'Консультация', price: 0, color: '#3498db' }];
+        data.services = [];
         data.inactiveDays = 30;
         save();
         toast('🗑️ Данные удалены');
