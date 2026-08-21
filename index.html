@@ -76,7 +76,19 @@
 </div>
 
 <!-- ИСТОРИЯ -->
+<!-- ИСТОРИЯ -->
 <div id="pageHistory" class="hidden">
+    <div class="report-block mb12">
+        <div class="flex gap12 mb12" id="historyPeriodTabs">
+            <button class="small-btn period-tab active" data-period="month">📆 Месяц</button>
+            <button class="small-btn period-tab" data-period="year">📊 Год</button>
+        </div>
+        <div class="flex gap12" style="align-items:center">
+            <span id="historyPeriodLabel" style="font-weight:600;white-space:nowrap"></span>
+            <button class="small-btn" id="historyPeriodPrev">◀</button>
+            <button class="small-btn" id="historyPeriodNext">▶</button>
+        </div>
+    </div>
     <input class="search-box" id="historySearch" placeholder="🔍 Поиск">
     <div class="filter-radio-group">
         <label><input type="radio" name="histFilter" value="all" checked> Все</label>
@@ -85,7 +97,6 @@
     </div>
     <div id="historyList"></div>
 </div>
-
 <!-- СТАТИСТИКА -->
 <div id="pageStats" class="hidden">
     <div class="report-block mb12">
