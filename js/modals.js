@@ -27,6 +27,7 @@ document.getElementById('saveClientBtn').onclick = function() {
         id: editClientId || nextId(data.clients),
         name,
         phone: document.getElementById('clientPhone').value,
+        comment: document.getElementById('clientComment')?.value || '',
         lastDate: '',
         lastService: ''
     };
@@ -69,9 +70,14 @@ export function openRecordModal(clientId) {
     document.getElementById('serviceSearchInput').value = '';
     document.getElementById('serviceDropdown').classList.add('hidden');
     document.getElementById('recordComment').value = '';
+    document.getElementById('clientComment').value = '';
 
     if (clientId) {
         updateCallLink();
+        let c = data.clients.find(x => x.id === clientId);
+        if (c && c.comment) {
+            document.getElementById('clientComment').value = c.comment;
+        }
     }
 
     updateTotal();
@@ -99,18 +105,13 @@ document.getElementById('clientSearchInput').addEventListener('input', function(
         document.getElementById('newClientFields').classList.remove('hidden');
         selectedClientId = null;
         document.getElementById('callLinkRow').style.display = 'none';
+        document.getElementById('clientComment').value = '';
     } else {
         document.getElementById('newClientFields').classList.add('hidden');
         let h = '';
         matches.forEach(c => {
             h += `<div class="client-option" data-id="${c.id}" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f3f7"
-                onmousedown="event.preventDefault();
-                document.getElementById('clientSearchInput').value='${c.name.replace(/'/g, "\\'")}';
-                document.getElementById('clientDropdown').classList.add('hidden');
-                document.getElementById('newClientFields').classList.add('hidden');
-                document.getElementById('callLinkRow').style.display='flex';
-                window._selectedClientId=${c.id};
-                window._updateCallLink();">
+                onmousedown="event.preventDefault(); window.selectClientFromDropdown(${c.id});">
                 <span style="font-weight:600">${c.name}</span>
                 <span style="font-size:.75rem;color:#999;float:right">${c.phone||''}</span>
             </div>`;
@@ -119,6 +120,19 @@ document.getElementById('clientSearchInput').addEventListener('input', function(
         dropdown.classList.remove('hidden');
     }
 });
+
+window.selectClientFromDropdown = function(clientId) {
+    let c = data.clients.find(x => x.id === clientId);
+    if (!c) return;
+    selectedClientId = c.id;
+    document.getElementById('clientSearchInput').value = c.name;
+    document.getElementById('clientDropdown').classList.add('hidden');
+    document.getElementById('newClientFields').classList.add('hidden');
+    document.getElementById('callLinkRow').style.display = c.phone ? 'flex' : 'none';
+    document.getElementById('clientComment').value = c.comment || '';
+    window._selectedClientId = c.id;
+    window._updateCallLink();
+};
 
 // Поиск услуги по названию
 document.getElementById('serviceSearchInput').addEventListener('input', function() {
@@ -228,6 +242,7 @@ document.getElementById('addClientFastBtn').onclick = function() {
         id: nextId(data.clients),
         name: name,
         phone: '',
+        comment: '',
         lastDate: '',
         lastService: ''
     };
@@ -238,6 +253,7 @@ document.getElementById('addClientFastBtn').onclick = function() {
     document.getElementById('clientDropdown').classList.add('hidden');
     document.getElementById('newClientFields').classList.add('hidden');
     document.getElementById('callLinkRow').style.display = 'none';
+    document.getElementById('clientComment').value = '';
 
     updateCallLink();
 };
@@ -285,11 +301,17 @@ document.getElementById('saveRecordBtn').onclick = function() {
             id: nextId(data.clients),
             name: n,
             phone: document.getElementById('newClientPhone').value,
+            comment: document.getElementById('clientComment').value || '',
             lastDate: '',
             lastService: ''
         };
         data.clients.push(c);
         cid = c.id;
+    } else {
+        let c = data.clients.find(x => x.id === cid);
+        if (c) {
+            c.comment = document.getElementById('clientComment').value || '';
+        }
     }
 
     if (document.getElementById('recordDate').value < todayStr()) {
@@ -349,7 +371,7 @@ export function editRecord(id) {
     document.getElementById('clientSearchInput').value = c ? c.name : '';
     document.getElementById('clientDropdown').classList.add('hidden');
     document.getElementById('newClientFields').classList.add('hidden');
-    document.getElementById('callLinkRow').style.display = 'flex';
+    document.getElementById('callLinkRow').style.display = c?.phone ? 'flex' : 'none';
     updateCallLink();
 
     document.getElementById('recordDate').value = r.date;
@@ -370,6 +392,7 @@ export function editRecord(id) {
     updateTotal();
 
     document.getElementById('recordComment').value = r.comment || '';
+    document.getElementById('clientComment').value = c?.comment || '';
 
     editRecordId = id;
     show('recordModal');
@@ -524,6 +547,7 @@ export function showClientStats(id) {
         <div class="card">
             <div class="card-row"><span>👤</span><span>${c.name}</span></div>
             <div class="card-row"><span>📞</span><span>${c.phone||'—'}</span></div>
+            <div class="card-row"><span>💬</span><span>${c.comment||'—'}</span></div>
             <div class="card-row"><span>✅</span><span>${done}</span></div>
             <div class="card-row"><span>❌</span><span>${canc}</span></div>
             <div class="card-row"><span>📊</span><span>${t}</span></div>
@@ -553,6 +577,8 @@ document.getElementById('editClientFromStatsBtn').onclick = function() {
     hide('clientStatsModal');
     document.getElementById('clientName').value = c.name;
     document.getElementById('clientPhone').value = c.phone || '';
+    let commentField = document.getElementById('clientComment');
+    if (commentField) commentField.value = c.comment || '';
     editClientId = statsClientId;
     document.getElementById('clientModalTitle').innerText = '✏️ Клиент';
     show('clientModal');
