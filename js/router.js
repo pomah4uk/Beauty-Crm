@@ -1,6 +1,6 @@
 // ===== НАВИГАЦИЯ =====
 
-import { renderDashboard, setPeriod, shiftPeriod } from './render/dashboard.js';
+import { renderDashboard } from './render/dashboard.js';
 import { renderClients } from './render/clients.js';
 import { renderActive } from './render/records.js';
 import { renderHistory } from './render/history.js';

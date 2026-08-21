@@ -18,8 +18,14 @@
     border-radius: 20px;
     padding: 20px;
     max-height: 90vh;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 12px;
 }
 .modal-input,
 .modal-select {
@@ -53,6 +59,19 @@
     margin-top: 16px;
 }
 .modal-buttons button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+}
+.modal-buttons-fixed {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.modal-buttons-fixed button {
     flex: 1;
     padding: 12px;
     border-radius: 12px;

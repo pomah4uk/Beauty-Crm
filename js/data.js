@@ -18,7 +18,8 @@ export let settings = JSON.parse(localStorage.getItem('crm_settings')) || {
     objectLabelPlural: 'Клиенты',
     workLabel: 'Запись',
     workLabelButton: '📝 Запись клиента',
-    currency: '₽'
+    currency: '₽',
+    payments: true
 };
 
 export function saveSettings() {

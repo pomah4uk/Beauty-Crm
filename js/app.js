@@ -14,7 +14,6 @@ import {
 } from './modals.js?v=7';
 import { callPhone } from './utils.js?v=7';
 import { initTheme } from './theme.js?v=7';
-import { setRecordsView } from './render/records.js?v=7';
 
 // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
 window.callPhone = callPhone;
@@ -67,13 +66,6 @@ document.querySelectorAll('#pageDashboard .dash-stat[data-nav]').forEach(el => {
         else if (n === 'expenses') setPage('expenses');
         else if (n === 'services') setPage('services');
         else if (n === 'stats') setPage('stats');
-    };
-});
-
-// ===== ПЕРЕКЛЮЧАТЕЛЬ ВИДА ЗАПИСЕЙ =====
-document.querySelectorAll('#recordsViewTabs .small-btn').forEach(tab => {
-    tab.onclick = function() {
-        setRecordsView(this.dataset.view);
     };
 });
 
@@ -162,9 +154,9 @@ document.querySelectorAll('.modal').forEach(modal => {
 
 // ===== КНОПКА НАЗАД =====
 function updateNavBack(page) {
-    let nav = document.getElementById('navBack');
-    if (nav) {
-        nav.style.display = (page === 'dashboard') ? 'none' : 'flex';
+    let navBtn = document.getElementById('navBackBtn');
+    if (navBtn) {
+        navBtn.style.display = (page === 'dashboard') ? 'none' : 'block';
     }
 }
 setOnPageChange(updateNavBack);

@@ -70,7 +70,8 @@ export function openRecordModal(clientId) {
     document.getElementById('serviceSearchInput').value = '';
     document.getElementById('serviceDropdown').classList.add('hidden');
     document.getElementById('recordComment').value = '';
-    document.getElementById('clientComment').value = '';
+    let prepaidField = document.getElementById('prepaidInput');
+    if (prepaidField) prepaidField.value = '';
 
     if (clientId) {
         updateCallLink();
@@ -105,7 +106,8 @@ document.getElementById('clientSearchInput').addEventListener('input', function(
         document.getElementById('newClientFields').classList.remove('hidden');
         selectedClientId = null;
         document.getElementById('callLinkRow').style.display = 'none';
-        document.getElementById('clientComment').value = '';
+        let commentField = document.getElementById('clientComment');
+        if (commentField) commentField.value = '';
     } else {
         document.getElementById('newClientFields').classList.add('hidden');
         let h = '';
@@ -129,7 +131,8 @@ window.selectClientFromDropdown = function(clientId) {
     document.getElementById('clientDropdown').classList.add('hidden');
     document.getElementById('newClientFields').classList.add('hidden');
     document.getElementById('callLinkRow').style.display = c.phone ? 'flex' : 'none';
-    document.getElementById('clientComment').value = c.comment || '';
+    let commentField = document.getElementById('clientComment');
+    if (commentField) commentField.value = c.comment || '';
     window._selectedClientId = c.id;
     window._updateCallLink();
 };
@@ -253,7 +256,8 @@ document.getElementById('addClientFastBtn').onclick = function() {
     document.getElementById('clientDropdown').classList.add('hidden');
     document.getElementById('newClientFields').classList.add('hidden');
     document.getElementById('callLinkRow').style.display = 'none';
-    document.getElementById('clientComment').value = '';
+    let commentField = document.getElementById('clientComment');
+    if (commentField) commentField.value = '';
 
     updateCallLink();
 };
@@ -301,7 +305,7 @@ document.getElementById('saveRecordBtn').onclick = function() {
             id: nextId(data.clients),
             name: n,
             phone: document.getElementById('newClientPhone').value,
-            comment: document.getElementById('clientComment').value || '',
+            comment: document.getElementById('clientComment')?.value || '',
             lastDate: '',
             lastService: ''
         };
@@ -310,7 +314,7 @@ document.getElementById('saveRecordBtn').onclick = function() {
     } else {
         let c = data.clients.find(x => x.id === cid);
         if (c) {
-            c.comment = document.getElementById('clientComment').value || '';
+            c.comment = document.getElementById('clientComment')?.value || '';
         }
     }
 
@@ -327,6 +331,8 @@ document.getElementById('saveRecordBtn').onclick = function() {
     let names = selectedServices.map(s => s.name);
     let total = selectedServices.reduce((sum, s) => sum + (parseInt(s.price) || 0), 0);
     let timeVal = document.getElementById('recordTime').value || '12:00';
+    let prepaidField = document.getElementById('prepaidInput');
+    let prepaid = prepaidField ? (parseInt(prepaidField.value) || 0) : 0;
 
     let r = {
         id: editRecordId || nextId(data.records),
@@ -335,6 +341,8 @@ document.getElementById('saveRecordBtn').onclick = function() {
         time: timeVal,
         service: names.join(' + '),
         price: total,
+        prepaid: prepaid,
+        paid: 0,
         comment: document.getElementById('recordComment').value || '',
         status: 'active'
     };
@@ -393,6 +401,8 @@ export function editRecord(id) {
 
     document.getElementById('recordComment').value = r.comment || '';
     document.getElementById('clientComment').value = c?.comment || '';
+    let prepaidField = document.getElementById('prepaidInput');
+    if (prepaidField) prepaidField.value = r.prepaid || '';
 
     editRecordId = id;
     show('recordModal');
@@ -403,6 +413,7 @@ export function completeRecord(id) {
     let r = data.records.find(x => x.id === id);
     if (r && r.status === 'active') {
         r.status = 'completed';
+        r.paid = r.price;
         updateLastVisit(r.clientId);
         save();
         toast('✅ Выполнено');
