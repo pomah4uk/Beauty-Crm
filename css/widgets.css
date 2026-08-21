@@ -10,25 +10,38 @@
     min-width: 90px;
     background: var(--card);
     border-radius: 18px 4px 18px 4px;
-    padding: 14px 8px;
+    padding: 16px 8px;
     text-align: center;
     cursor: pointer;
-    box-shadow: 0 4px 16px var(--shadow);
+    box-shadow: 0 2px 8px var(--shadow);
     transition: transform .15s, box-shadow .2s;
     border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    min-height: 76px;
 }
 .dash-stat:active {
-    transform: scale(.96);
-    box-shadow: 0 6px 24px rgba(59, 109, 240, 0.18);
+    transform: scale(.97);
+    box-shadow: 0 4px 12px rgba(59, 109, 240, 0.15);
 }
 .dash-stat-value {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 800;
     color: var(--accent);
+    line-height: 1;
 }
 .dash-stat-label {
-    font-size: .7rem;
+    font-size: .65rem;
     color: var(--sub);
-    margin-top: 2px;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+body.dark .dash-stat {
+    background: var(--card);
+    border-color: var(--border);
+    box-shadow: 0 2px 8px var(--shadow);
 }

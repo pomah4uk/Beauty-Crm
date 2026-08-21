@@ -15,28 +15,37 @@
     background: var(--card);
     width: 90%;
     max-width: 400px;
-    border-radius: 24px;
-    padding: 22px;
+    border-radius: 20px;
+    padding: 20px;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 .modal-input,
 .modal-select {
     width: 100%;
-    padding: var(--pad);
+    padding: 12px 14px;
     margin-bottom: 10px;
-    border-radius: var(--br);
+    border-radius: 12px;
     border: 1px solid var(--border);
-    background: var(--card);
+    background: var(--bg);
     color: var(--text);
-    font-size: 1rem;
+    font-size: .95rem;
+    transition: border-color .15s, box-shadow .15s;
+}
+.modal-input:focus,
+.modal-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
 }
 .modal-label {
-    font-size: .82rem;
+    font-size: .78rem;
     font-weight: 600;
     margin-bottom: 4px;
     display: block;
     color: var(--sub);
+    letter-spacing: .3px;
 }
 .modal-buttons {
     display: flex;
@@ -45,24 +54,24 @@
 }
 .modal-buttons button {
     flex: 1;
-    padding: var(--pad);
-    border-radius: var(--br);
+    padding: 12px;
+    border-radius: 12px;
     border: none;
     font-weight: 600;
     cursor: pointer;
 }
 .modal-hint {
     font-size: .72rem;
-    color: #888;
+    color: var(--sub);
     margin-top: -6px;
     margin-bottom: 10px;
 }
 .total-display {
-    background: var(--card);
+    background: var(--bg);
     font-size: 1.1rem;
     font-weight: 800;
-    padding: var(--pad);
-    border-radius: var(--br);
+    padding: 14px;
+    border-radius: 12px;
     text-align: center;
     margin-bottom: 10px;
     border: 2px solid var(--green);
@@ -73,5 +82,17 @@
     gap: 8px;
     align-items: center;
     margin-bottom: 8px;
+    padding: 6px;
+    background: var(--bg);
+    border-radius: 8px;
 }
-.service-row select { flex: 1; }
+.service-row select,
+.service-row input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text);
+    font-size: .85rem;
+}
