@@ -4,6 +4,18 @@ import { data, clientName, clientPhone, todayStr, monthExp } from '../data.js';
 import { callPhone } from '../utils.js';
 import { addSwipeListeners } from './swipe.js';
 
+let dashboardDate = new Date();
+
+export function shiftDashboardDate(dir) {
+    dashboardDate.setDate(dashboardDate.getDate() + dir);
+    renderDashboard();
+}
+
+export function setDashboardDate(date) {
+    dashboardDate = date;
+    renderDashboard();
+}
+
 export function renderDashboard() {
     let n = new Date();
     let m = n.getMonth(), y = n.getFullYear();
@@ -15,10 +27,15 @@ export function renderDashboard() {
     let revenueEl = document.getElementById('statRevenue');
     if (revenueEl) revenueEl.innerText = rev + '₽';
 
-    // Активные заказы
-    let activeRecords = data.records
-        .filter(r => r.status === 'active')
-        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+    // Обновляем лейбл даты
+    let dateLabelEl = document.getElementById('dateLabel');
+    if (dateLabelEl) {
+        dateLabelEl.innerText = dashboardDate.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+
+    let selectedDate = dashboardDate.getFullYear() + '-' +
+        (''+(dashboardDate.getMonth()+1)).padStart(2,'0') + '-' +
+        (''+dashboardDate.getDate()).padStart(2,'0');
 
     let today = todayStr();
     let tomorrow = new Date();
@@ -27,12 +44,28 @@ export function renderDashboard() {
         (''+(tomorrow.getMonth()+1)).padStart(2,'0') + '-' +
         (''+tomorrow.getDate()).padStart(2,'0');
 
+    // Показываем записи на выбранную дату или все активные
+    let activeRecords = data.records
+        .filter(r => r.status === 'active')
+        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+    // Если выбрана конкретная дата — показываем записи на эту дату
+    // Если дата сегодня — показываем все активные
+    let displayRecords;
+    if (selectedDate === today) {
+        displayRecords = activeRecords;
+    } else {
+        displayRecords = data.records
+            .filter(r => r.status === 'active' && r.date === selectedDate)
+            .sort((a, b) => (a.time||'12:00').localeCompare(b.time||'12:00'));
+    }
+
     let h = '';
 
-    if (activeRecords.length === 0) {
+    if (displayRecords.length === 0) {
         h = '<div class="empty-state"><span class="emoji">📋</span>Нет активных заказов</div>';
     } else {
-        activeRecords.forEach(r => {
+        displayRecords.forEach(r => {
             let clientNameStr = clientName(r.clientId);
             let phone = clientPhone(r.clientId);
 

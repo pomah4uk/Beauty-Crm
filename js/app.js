@@ -1,19 +1,19 @@
 // ===== ТОЧКА ВХОДА =====
 
-import { setPage, setOnPageChange } from './router.js?v=10';
-import { renderHistory, setHistoryPeriod, shiftHistoryPeriod } from './render/history.js';
-import { renderServices } from './render/services.js';
-import { renderDashboard } from './render/dashboard.js';
-import { setStatsPeriod, shiftStatsPeriod } from './render/stats.js';
+import { setPage, setOnPageChange } from './router.js?v=11';
+import { renderHistory, setHistoryPeriod, shiftHistoryPeriod } from './render/history.js?v=11';
+import { renderServices } from './render/services.js?v=11';
+import { renderDashboard, shiftDashboardDate, setDashboardDate } from './render/dashboard.js?v=11';
+import { setStatsPeriod, shiftStatsPeriod } from './render/stats.js?v=11';
 import {
     openClientModal, openRecordModal, openExpenseModal, editExpense,
     openServiceModal, editService, showClientStats,
     editRecord, completeRecord, cancelRecord,
     deleteRecord, deleteExpense, deleteService,
     openInactiveModal, exportData, importData, resetData
-} from './modals.js?v=10';
-import { callPhone } from './utils.js?v=10';
-import { initTheme, toggleTheme, randomTheme } from './theme.js?v=10';
+} from './modals.js?v=11';
+import { callPhone } from './utils.js?v=11';
+import { initTheme, toggleTheme, randomTheme } from './theme.js?v=11';
 
 // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
 window.callPhone = callPhone;
@@ -55,6 +55,12 @@ document.querySelectorAll('#pageMenu [data-page]').forEach(btn => {
     btn.onclick = function() { setPage(this.dataset.page); };
 });
 
+// ===== ПЕРЕКЛЮЧАТЕЛЬ ДАТ НА ГЛАВНОЙ =====
+btn = document.getElementById('datePrevBtn');
+if (btn) btn.onclick = function() { shiftDashboardDate(-1); };
+btn = document.getElementById('dateNextBtn');
+if (btn) btn.onclick = function() { shiftDashboardDate(1); };
+
 // ===== ПОДЕЛИТЬСЯ =====
 btn = document.getElementById('shareMenuBtn');
 if (btn) btn.onclick = async function() {
@@ -93,9 +99,6 @@ document.querySelectorAll('input[name="histFilter"]').forEach(r => {
 });
 
 // ===== ПЕРИОД В ИСТОРИИ =====
-document.querySelectorAll('#historyPeriodTabs .period-tab').forEach(tab => {
-    tab.onclick = function() { setHistoryPeriod(this.dataset.period); };
-});
 btn = document.getElementById('historyPeriodPrev');
 if (btn) btn.onclick = function() { shiftHistoryPeriod(-1); };
 btn = document.getElementById('historyPeriodNext');
