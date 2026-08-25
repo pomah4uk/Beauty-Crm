@@ -1,6 +1,6 @@
 // ===== ТОЧКА ВХОДА =====
 
-import { setPage, setOnPageChange } from './router.js?v=7';
+import { setPage, setOnPageChange } from './router.js?v=10';
 import { renderHistory, setHistoryPeriod, shiftHistoryPeriod } from './render/history.js';
 import { renderServices } from './render/services.js';
 import { renderDashboard } from './render/dashboard.js';
@@ -11,9 +11,9 @@ import {
     editRecord, completeRecord, cancelRecord,
     deleteRecord, deleteExpense, deleteService,
     openInactiveModal, exportData, importData, resetData
-} from './modals.js?v=7';
-import { callPhone } from './utils.js?v=7';
-import { initTheme } from './theme.js?v=7';
+} from './modals.js?v=10';
+import { callPhone } from './utils.js?v=10';
+import { initTheme, toggleTheme, randomTheme } from './theme.js?v=10';
 
 // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
 window.callPhone = callPhone;
@@ -27,6 +27,8 @@ window.deleteRecord = deleteRecord;
 window.deleteExpense = deleteExpense;
 window.deleteService = deleteService;
 window.openRecordModal = openRecordModal;
+window.goPage = function(page) { setPage(page); };
+window.goHome = function() { setPage('dashboard'); };
 
 // ===== КНОПКИ =====
 let btn;
@@ -43,31 +45,40 @@ if (btn) btn.onclick = openExpenseModal;
 btn = document.getElementById('addServiceBtn');
 if (btn) btn.onclick = openServiceModal;
 
-// ===== ВИДЖЕТЫ =====
-document.querySelectorAll('#pageDashboard .dash-stat[data-nav]').forEach(el => {
-    el.onclick = function() {
-        let n = this.dataset.nav;
-        if (n === 'clients') setPage('clients');
-        else if (n === 'active') setPage('records');
-        else if (n === 'completed') {
-            setPage('history');
-            setTimeout(() => {
-                let rb = document.querySelector('input[name="histFilter"][value="completed"]');
-                if (rb) { rb.checked = true; renderHistory(); }
-            }, 50);
-        }
-        else if (n === 'cancelled') {
-            setPage('history');
-            setTimeout(() => {
-                let rb = document.querySelector('input[name="histFilter"][value="cancelled"]');
-                if (rb) { rb.checked = true; renderHistory(); }
-            }, 50);
-        }
-        else if (n === 'expenses') setPage('expenses');
-        else if (n === 'services') setPage('services');
-        else if (n === 'stats') setPage('stats');
-    };
+// ===== МЕНЮ =====
+btn = document.getElementById('menuBtn');
+if (btn) btn.onclick = function() { setPage('menu'); };
+btn = document.getElementById('menuCloseBtn');
+if (btn) btn.onclick = function() { setPage('dashboard'); };
+
+document.querySelectorAll('#pageMenu [data-page]').forEach(btn => {
+    btn.onclick = function() { setPage(this.dataset.page); };
 });
+
+// ===== ПОДЕЛИТЬСЯ =====
+btn = document.getElementById('shareMenuBtn');
+if (btn) btn.onclick = async function() {
+    let link = 'https://pomah4uk.github.io/Beauty-Crm/booking.html';
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'Красивые губы',
+                text: 'Ждут тебя здесь!!!',
+                url: link
+            });
+        } catch(e) {}
+    } else {
+        navigator.clipboard.writeText(link)
+            .then(() => toast('📋 Ссылка скопирована'))
+            .catch(() => {});
+    }
+};
+
+// ===== ТЕМА В МЕНЮ =====
+btn = document.getElementById('themeMenuBtn');
+if (btn) btn.onclick = function() { toggleTheme(); };
+btn = document.getElementById('randomThemeMenuBtn');
+if (btn) btn.onclick = function() { randomTheme(); };
 
 // ===== ПОИСК =====
 btn = document.getElementById('clientSearch');
@@ -99,35 +110,7 @@ if (btn) btn.onclick = function() { shiftStatsPeriod(-1); };
 btn = document.getElementById('statsPeriodNext');
 if (btn) btn.onclick = function() { shiftStatsPeriod(1); };
 
-// ===== ДАВНО НЕ ЗАХОДИЛИ =====
-btn = document.getElementById('inactiveTitle');
-if (btn) btn.onclick = function(e) {
-    e.stopPropagation();
-    openInactiveModal();
-};
-
-// ===== ССЫЛКА =====
-btn = document.getElementById('shareHeaderBtn');
-if (btn) btn.onclick = async function() {
-    let link = 'https://pomah4uk.github.io/Beauty-Crm/booking.html';
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: 'Красивые губы',
-                text: 'Ждут тебя здесь!!!',
-                url: link
-            });
-        } catch(e) {}
-    } else {
-        navigator.clipboard.writeText(link)
-            .then(() => toast('📋 Ссылка скопирована'))
-            .catch(() => {});
-    }
-};
-
 // ===== БЭКАП =====
-btn = document.getElementById('backupHeaderBtn');
-if (btn) btn.onclick = function() { setPage('backup'); };
 btn = document.getElementById('exportBtn');
 if (btn) btn.onclick = exportData;
 btn = document.getElementById('importBtn');
@@ -160,10 +143,6 @@ function updateNavBack(page) {
     }
 }
 setOnPageChange(updateNavBack);
-
-window.goHome = function() {
-    setPage('dashboard');
-};
 
 // ===== TOAST =====
 window.toast = function(msg) {

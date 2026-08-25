@@ -6,52 +6,44 @@
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="CRM Мастер">
-    <meta name="theme-color" content="#f1f2f6">
-    <link rel="stylesheet" href="css/style.css?v=8">
+    <meta name="theme-color" content="#f8fafc">
+    <link rel="stylesheet" href="css/style.css?v=10">
     <title>CRM Мастер</title>
 </head>
 <body>
 
-<div class="header">
-    <h1 id="pageTitle">Главная</h1>
-    <button class="header-icon" id="randomThemeBtn" title="Случайная тема">🎲</button>
-    <button class="header-icon" id="shareHeaderBtn" title="Поделиться">🔗</button>
-    <button class="header-icon" id="backupHeaderBtn" title="Бэкап">💾</button>
-    <button class="theme-switch" id="themeBtn">🌙</button>
-</div>
-
 <!-- ГЛАВНАЯ -->
 <div id="pageDashboard">
-    <div class="report-block mb12" id="todayBlock">
-        <h3 class="mb12">📅 Сегодня (<span id="todayDate"></span>)</h3>
-        <div id="todayList"></div>
-        <div class="day-total">💰 Итого за сегодня: <span id="todayListTotal">0</span>₽</div>
-    </div>
-    <div class="report-block mb12" id="tomorrowBlock">
-        <h3 class="mb12">📅 Завтра (<span id="tomorrowDate"></span>)</h3>
-        <div id="tomorrowList"></div>
-        <div class="day-total">💰 Итого за завтра: <span id="tomorrowListTotal">0</span>₽</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h1 id="pageTitle" style="margin:0;">Рабочее место</h1>
+        <button id="menuBtn" class="btn btn-primary" style="width:auto;margin:0;padding:10px 16px;">☰ Меню</button>
     </div>
 
-    <div class="dash-stats">
-        <div class="dash-stat" data-nav="active"><div class="dash-stat-label">📝 Активных</div><div class="dash-stat-value" id="statActive">0</div></div>
-        <div class="dash-stat" data-nav="completed"><div class="dash-stat-label">✅ Выполнено</div><div class="dash-stat-value" id="statCompleted">0</div></div>
-        <div class="dash-stat" data-nav="cancelled"><div class="dash-stat-label">❌ Отменено</div><div class="dash-stat-value" id="statCancelled">0</div></div>
-    </div>
-    <div class="dash-stats">
-        <div class="dash-stat"><div class="dash-stat-label">💰 Выручка</div><div class="dash-stat-value" id="statRevenue">0₽</div></div>
-        <div class="dash-stat" data-nav="expenses"><div class="dash-stat-label">💸 Затраты</div><div class="dash-stat-value" id="statCost">0₽</div></div>
-        <div class="dash-stat" data-nav="stats"><div class="dash-stat-label">📈 Прибыль</div><div class="dash-stat-value" id="statProfit">0₽</div></div>
-    </div>
-    <div class="dash-stats">
-        <div class="dash-stat" data-nav="clients"><div class="dash-stat-label">👥 Всего клиентов</div><div class="dash-stat-value" id="statTotalClients">0</div></div>
-        <div class="dash-stat"><div class="dash-stat-label">💰 Средний чек</div><div class="dash-stat-value" id="statAvgCheck">0₽</div></div>
-        <div class="dash-stat" data-nav="services"><div class="dash-stat-label">⭐ Топ услуга</div><div class="dash-stat-value" id="statTopService" style="font-size:1rem">—</div></div>
+    <div class="report-block" id="monthSummary" style="cursor:pointer;text-align:center;padding:24px;" onclick="window.goPage('stats')">
+        <div style="font-size:.85rem;color:var(--sub);margin-bottom:4px;">Заработано за месяц</div>
+        <div style="font-size:2.2rem;font-weight:800;color:var(--green);" id="statRevenue">0₽</div>
     </div>
 
     <div class="report-block">
-        <h3 class="mb12" id="inactiveTitle" style="cursor:pointer">⏰ Были больше <span id="inactiveDaysLabel">30</span>&nbsp;дней назад: ⚙️</h3>
-        <div id="inactiveList"></div>
+        <h3 class="mb12">📋 Активные заказы</h3>
+        <div id="activeOrdersList"></div>
+    </div>
+</div>
+
+<!-- МЕНЮ -->
+<div id="pageMenu" class="hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h1 style="margin:0;">Меню</h1>
+        <button id="menuCloseBtn" class="btn btn-danger" style="width:auto;margin:0;padding:10px 16px;">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn btn-primary" data-page="clients">👥 Клиенты</button>
+        <button class="btn btn-primary" data-page="history">📜 История</button>
+        <button class="btn btn-primary" data-page="stats">📊 Статистика</button>
+        <button class="btn btn-primary" data-page="services">⭐ Услуги</button>
+        <button class="btn btn-primary" data-page="backup">💾 Бэкап</button>
+        <button class="btn btn-primary" id="themeMenuBtn">🌙 Тема</button>
+        <button class="btn btn-primary" id="randomThemeMenuBtn">🎲 Случайная тема</button>
     </div>
 </div>
 
@@ -119,12 +111,6 @@
         <h3 class="mb12">🏆 Топ услуг</h3>
         <div id="statsTopServices"></div>
     </div>
-</div>
-
-<!-- РАСХОДЫ -->
-<div id="pageExpenses" class="hidden">
-    <button id="addExpenseBtn2" class="btn btn-orange mb12">➕ Добавить расход</button>
-    <div id="expensesList"></div>
 </div>
 
 <!-- УСЛУГИ -->
@@ -261,18 +247,22 @@
     </div>
 </div>
 
-<!-- МОДАЛКА СТАТИСТИКИ -->
+<!-- МОДАЛКА СТАТИСТИКИ КЛИЕНТА -->
 <div id="clientStatsModal" class="modal">
-    <div class="modal-content">
-        <h3 id="clientStatsTitle"></h3>
-        <div class="modal-body">
+    <div class="modal-content" style="padding:0;overflow:hidden">
+        <div class="client-stats-header">
+            <div class="client-avatar">👤</div>
+            <h3 id="clientStatsTitle" style="margin:0;font-size:1.2rem;"></h3>
+            <p id="clientStatsPhone" style="margin:4px 0 0;font-size:.85rem;color:var(--sub);"></p>
+        </div>
+        <div class="modal-body" style="padding:16px;">
             <div id="clientStatsContent"></div>
             <button id="createRecordForClientBtn" class="btn btn-success" style="width:100%;margin-bottom:8px">📝 Запись клиента</button>
-            <button id="editClientFromStatsBtn" class="btn" style="width:100%;margin-bottom:8px">✏️ Редактировать</button>
+            <button id="editClientFromStatsBtn" class="btn btn-primary" style="width:100%;margin-bottom:8px">✏️ Редактировать</button>
             <button id="deleteClientFromStatsBtn" class="btn btn-danger" style="width:100%;margin-bottom:8px">🗑️ Удалить</button>
-            <div class="modal-buttons-fixed">
-                <button id="closeStatsBtn" class="btn-primary" style="flex:1">Закрыть</button>
-            </div>
+        </div>
+        <div class="modal-buttons-fixed" style="padding:12px 16px;border-top:1px solid var(--border);">
+            <button id="closeStatsBtn" class="btn-primary" style="flex:1">Закрыть</button>
         </div>
     </div>
 </div>
@@ -284,6 +274,6 @@
     <button id="addExpenseBtn" class="btn btn-orange" style="flex:1;margin:0">💸 Расход</button>
 </div>
 
-<script type="module" src="js/app.js?v=8"></script>
+<script type="module" src="js/app.js?v=10"></script>
 </body>
 </html>

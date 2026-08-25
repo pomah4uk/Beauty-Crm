@@ -1,5 +1,6 @@
 // ===== НАВИГАЦИЯ =====
 
+import { onDataChange } from './data.js';
 import { renderDashboard } from './render/dashboard.js';
 import { renderClients } from './render/clients.js';
 import { renderActive } from './render/records.js';
@@ -7,17 +8,16 @@ import { renderHistory } from './render/history.js';
 import { renderExpenses } from './render/expenses.js';
 import { renderServices } from './render/services.js';
 import { renderStats } from './render/stats.js';
-import { onDataChange } from './data.js';
 
 export let currentPage = 'dashboard';
 
 const titles = {
-    dashboard: 'Главная',
+    dashboard: 'Рабочее место',
+    menu: 'Меню',
     clients: 'Клиенты',
-    records: 'Активные записи',
+    records: 'Активные заказы',
     history: 'История',
     stats: 'Статистика',
-    expenses: 'Расходы',
     services: 'Услуги',
     backup: 'Бэкап'
 };
@@ -38,20 +38,23 @@ function renderCurrentPage() {
         case 'records':   renderActive(); break;
         case 'history':   renderHistory(); break;
         case 'stats':     renderStats(); break;
-        case 'expenses':  renderExpenses(); break;
         case 'services':  renderServices(); break;
+        case 'menu':      break;
     }
 }
 
 export function setPage(p) {
     currentPage = p;
 
-    ['Dashboard', 'Clients', 'Records', 'History', 'Stats', 'Expenses', 'Services', 'Backup'].forEach(name => {
+    ['Dashboard', 'Menu', 'Clients', 'Records', 'History', 'Stats', 'Services', 'Backup'].forEach(name => {
         let el = document.getElementById('page' + name);
         if (el) el.style.display = (p === name.toLowerCase()) ? 'block' : 'none';
     });
 
-    document.getElementById('pageTitle').innerText = titles[p] || '';
+    let pageTitleEl = document.getElementById('pageTitle');
+    if (pageTitleEl) {
+        pageTitleEl.innerText = titles[p] || '';
+    }
 
     if (onPageChange) onPageChange(p);
     renderCurrentPage();

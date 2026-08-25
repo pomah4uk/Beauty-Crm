@@ -31,19 +31,71 @@ let customColors = JSON.parse(localStorage.getItem('custom_colors') || 'null');
 
 export function initTheme() {
     applyCurrentTheme();
-    
-    let themeBtn = document.getElementById('themeBtn');
-    let randomBtn = document.getElementById('randomThemeBtn');
-    
-    if (themeBtn) {
-        updateThemeIcon(themeBtn);
-        themeBtn.onclick = toggleTheme;
+}
+
+export function toggleTheme() {
+    if (currentTheme === 'custom') {
+        currentTheme = 'light';
+        customColors = null;
+        localStorage.removeItem('custom_colors');
+    } else if (currentTheme === 'light') {
+        currentTheme = 'dark';
+    } else {
+        currentTheme = 'light';
     }
     
-    if (randomBtn) {
-        updateRandomIcon(randomBtn);
-        randomBtn.onclick = toggleCustomTheme;
+    localStorage.setItem('theme_mode', currentTheme);
+    applyCurrentTheme();
+}
+
+export function randomTheme() {
+    currentTheme = 'custom';
+    
+    let style = Math.floor(Math.random() * 4);
+    let h = Math.floor(Math.random() * 360);
+    let h2 = (h + 30 + Math.floor(Math.random() * 60)) % 360;
+    
+    let bgL, cardL, textL, subL;
+    
+    if (style === 0) {
+        bgL = 8 + Math.floor(Math.random() * 15);
+        cardL = bgL + 5;
+        textL = 85 + Math.floor(Math.random() * 10);
+        subL = 55 + Math.floor(Math.random() * 15);
+    } else if (style === 1) {
+        bgL = 88 + Math.floor(Math.random() * 10);
+        cardL = 95 + Math.floor(Math.random() * 5);
+        textL = 10 + Math.floor(Math.random() * 15);
+        subL = 35 + Math.floor(Math.random() * 15);
+    } else if (style === 2) {
+        bgL = 80 + Math.floor(Math.random() * 10);
+        cardL = 90 + Math.floor(Math.random() * 8);
+        textL = 20 + Math.floor(Math.random() * 15);
+        subL = 40 + Math.floor(Math.random() * 10);
+    } else {
+        bgL = 45 + Math.floor(Math.random() * 20);
+        cardL = bgL + 10;
+        textL = bgL > 55 ? 8 : 90;
+        subL = textL === 8 ? 35 : 65;
     }
+    
+    let s = 20 + Math.floor(Math.random() * 50);
+    
+    customColors = {
+        bg: `hsl(${h}, ${s}%, ${bgL}%)`,
+        card: `hsl(${h}, ${s-10}%, ${cardL}%)`,
+        text: `hsl(${h}, 15%, ${textL}%)`,
+        sub: `hsl(${h}, 10%, ${subL}%)`,
+        accent: `hsl(${h2}, 60%, 50%)`,
+        green: `hsl(150, 50%, 40%)`,
+        gold: `hsl(40, 80%, 50%)`,
+        red: `hsl(0, 60%, 50%)`,
+        border: `hsl(${h}, 10%, ${bgL > 50 ? bgL-15 : bgL+15}%)`,
+        shadow: `hsl(${h}, 10%, ${bgL > 50 ? bgL-20 : bgL-5}%)`,
+    };
+    localStorage.setItem('custom_colors', JSON.stringify(customColors));
+    localStorage.setItem('theme_mode', 'custom');
+    applyCurrentTheme();
 }
 
 function applyCurrentTheme() {
@@ -59,88 +111,6 @@ function applyCurrentTheme() {
     }
 }
 
-function toggleTheme() {
-    if (currentTheme === 'custom') {
-        currentTheme = 'light';
-        customColors = null;
-        localStorage.removeItem('custom_colors');
-    } else if (currentTheme === 'light') {
-        currentTheme = 'dark';
-    } else {
-        currentTheme = 'light';
-    }
-    
-    localStorage.setItem('theme_mode', currentTheme);
-    applyCurrentTheme();
-    
-    let themeBtn = document.getElementById('themeBtn');
-    let randomBtn = document.getElementById('randomThemeBtn');
-    if (themeBtn) updateThemeIcon(themeBtn);
-    if (randomBtn) updateRandomIcon(randomBtn);
-}
-
-function toggleCustomTheme() {
-    if (currentTheme === 'custom') {
-        currentTheme = 'light';
-        customColors = null;
-        localStorage.removeItem('custom_colors');
-    } else {
-        currentTheme = 'custom';
-        
-        let style = Math.floor(Math.random() * 4);
-        let h = Math.floor(Math.random() * 360);
-        let h2 = (h + 30 + Math.floor(Math.random() * 60)) % 360;
-        
-        let bgL, cardL, textL, subL;
-        
-        if (style === 0) {
-            bgL = 8 + Math.floor(Math.random() * 15);
-            cardL = bgL + 5;
-            textL = 85 + Math.floor(Math.random() * 10);
-            subL = 55 + Math.floor(Math.random() * 15);
-        } else if (style === 1) {
-            bgL = 88 + Math.floor(Math.random() * 10);
-            cardL = 95 + Math.floor(Math.random() * 5);
-            textL = 10 + Math.floor(Math.random() * 15);
-            subL = 35 + Math.floor(Math.random() * 15);
-        } else if (style === 2) {
-            bgL = 80 + Math.floor(Math.random() * 10);
-            cardL = 90 + Math.floor(Math.random() * 8);
-            textL = 20 + Math.floor(Math.random() * 15);
-            subL = 40 + Math.floor(Math.random() * 10);
-        } else {
-            bgL = 45 + Math.floor(Math.random() * 20);
-            cardL = bgL + 10;
-            textL = bgL > 55 ? 8 : 90;
-            subL = textL === 8 ? 35 : 65;
-        }
-        
-        let s = 20 + Math.floor(Math.random() * 50);
-        
-        customColors = {
-            bg: `hsl(${h}, ${s}%, ${bgL}%)`,
-            card: `hsl(${h}, ${s-10}%, ${cardL}%)`,
-            text: `hsl(${h}, 15%, ${textL}%)`,
-            sub: `hsl(${h}, 10%, ${subL}%)`,
-            accent: `hsl(${h2}, 60%, 50%)`,
-            green: `hsl(150, 50%, 40%)`,
-            gold: `hsl(40, 80%, 50%)`,
-            red: `hsl(0, 60%, 50%)`,
-            border: `hsl(${h}, 10%, ${bgL > 50 ? bgL-15 : bgL+15}%)`,
-            shadow: `hsl(${h}, 10%, ${bgL > 50 ? bgL-20 : bgL-5}%)`,
-        };
-        localStorage.setItem('custom_colors', JSON.stringify(customColors));
-    }
-    
-    localStorage.setItem('theme_mode', currentTheme);
-    applyCurrentTheme();
-    
-    let themeBtn = document.getElementById('themeBtn');
-    let randomBtn = document.getElementById('randomThemeBtn');
-    if (themeBtn) updateThemeIcon(themeBtn);
-    if (randomBtn) updateRandomIcon(randomBtn);
-}
-
 function applyColors(c) {
     let root = document.documentElement;
     root.style.setProperty('--bg', c.bg);
@@ -153,12 +123,4 @@ function applyColors(c) {
     root.style.setProperty('--red', c.red);
     root.style.setProperty('--border', c.border);
     root.style.setProperty('--shadow', c.shadow);
-}
-
-function updateThemeIcon(btn) {
-    btn.innerText = currentTheme === 'dark' ? '☀️' : '🌙';
-}
-
-function updateRandomIcon(btn) {
-    btn.innerText = currentTheme === 'custom' ? '✅' : '🎲';
 }

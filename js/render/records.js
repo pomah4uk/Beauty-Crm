@@ -13,31 +13,34 @@ export function renderActive() {
     let h = '';
 
     if (!filtered.length) {
-        h = '<div class="empty-state">Нет активных записей</div>';
+        h = '<div class="empty-state"><span class="emoji">📋</span>Нет активных записей</div>';
     } else {
         filtered.forEach(r => {
             let p = clientPhone(r.clientId);
-            let color = getServiceColor(r.service?.split(' + ')[0]);
             let c = data.clients.find(x => x.id === r.clientId);
 
-            // Статус оплаты
             let paidStatus = '';
             if (r.prepaid > 0) {
-                paidStatus = `<div style="margin-top:8px;padding:6px 10px;border:1px solid #f5a623;border-radius:8px;color:#f5a623;font-size:.75rem;font-weight:600;">
-                    🟡 Предоплата: ${r.prepaid}₽
-                </div>`;
+                paidStatus = `<span class="pay-badge yellow">Предоплата ${r.prepaid}₽</span>`;
             } else {
-                paidStatus = `<div style="margin-top:8px;padding:6px 10px;border:1px solid #e74c3c;border-radius:8px;color:#e74c3c;font-size:.75rem;font-weight:600;">
-                    🔴 Не оплачено
-                </div>`;
+                paidStatus = `<span class="pay-badge red">Не оплачено</span>`;
             }
 
-            h += `<div class="card swipe-card pad12 mb8" style="cursor:pointer;border-left:4px solid ${color}" data-id="${r.id}" data-type="record-active" onclick="window.editRecord(${r.id})">
-                <div class="flex between mb8"><span class="card-name">${clientName(r.clientId)}</span><span style="font-size:.85rem;color:#666">${r.time||'12:00'} — ${r.service||'—'}</span></div>
-                ${c && c.comment ? `<div style="font-size:.75rem;color:#888;margin-bottom:8px">💬 ${c.comment}</div>` : ''}
-                <div style="font-weight:700;font-size:1rem;">${r.price} ₽</div>
-                ${paidStatus}
-                ${p?`<button class="btn btn-success" style="margin-top:8px;margin-bottom:0" onclick="event.stopPropagation();window.callPhone('${p}')">📞 Позвонить</button>`:''}</div>`;
+            h += `
+                <div class="card" onclick="window.editRecord(${r.id})">
+                    <div class="card-header">
+                        <span class="card-name">${clientName(r.clientId)}</span>
+                        <span style="font-size:.85rem;color:var(--sub);">${r.time||'12:00'}</span>
+                    </div>
+                    <div style="font-size:.95rem;color:var(--sub);margin-bottom:8px;">${r.date||'—'}</div>
+                    <div style="font-size:1rem;margin-bottom:8px;">${r.service||'—'}</div>
+                    ${c && c.comment ? `<div style="font-size:.85rem;color:var(--sub);margin-bottom:8px;">💬 ${c.comment}</div>` : ''}
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-weight:800;font-size:1.2rem;">${r.price} ₽</span>
+                        ${paidStatus}
+                    </div>
+                    ${p ? `<button class="call-btn" style="margin-top:12px;width:100%;padding:10px;border-radius:14px;font-size:.9rem;" onclick="event.stopPropagation();window.callPhone('${p}')">📞 Позвонить</button>` : ''}
+                </div>`;
         });
     }
 

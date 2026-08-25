@@ -1,6 +1,6 @@
 // ===== РЕНДЕР СТАТИСТИКИ =====
 
-import { data, monthExp, getServiceColor } from '../data.js';
+import { data, monthExp } from '../data.js';
 
 let statsPeriod = 'month';
 let statsDate = new Date();
@@ -23,14 +23,14 @@ export function shiftStatsPeriod(dir) {
 export function renderStats() {
     let n = statsDate;
     let m = n.getMonth(), y = n.getFullYear();
-    
+
     let periodRecords;
     let periodLabel;
-    
+
     if (statsPeriod === 'day') {
-        let dateStr = n.toISOString().slice(0, 10);
+        let dateStr = n.getFullYear() + '-' + (''+(n.getMonth()+1)).padStart(2,'0') + '-' + (''+n.getDate()).padStart(2,'0');
         periodRecords = data.records.filter(r => r.status === 'completed' && r.date === dateStr);
-        periodLabel = n.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+        periodLabel = n.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     } else if (statsPeriod === 'month') {
         periodRecords = data.records.filter(r => r.status === 'completed' && r.date && new Date(r.date).getMonth() === m && new Date(r.date).getFullYear() === y);
         periodLabel = n.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
@@ -38,29 +38,31 @@ export function renderStats() {
         periodRecords = data.records.filter(r => r.status === 'completed' && r.date && new Date(r.date).getFullYear() === y);
         periodLabel = n.getFullYear().toString();
     }
-    
+
     let rev = periodRecords.reduce((s, r) => s + (r.price || 0), 0);
-    
+
     let exp;
     if (statsPeriod === 'day') {
-        exp = data.expenses.filter(e => e.date === n.toISOString().slice(0, 10)).reduce((s, e) => s + e.amount, 0);
+        let dateStr = n.getFullYear() + '-' + (''+(n.getMonth()+1)).padStart(2,'0') + '-' + (''+n.getDate()).padStart(2,'0');
+        exp = data.expenses.filter(e => e.date === dateStr).reduce((s, e) => s + e.amount, 0);
     } else if (statsPeriod === 'month') {
         exp = monthExp(m, y);
     } else {
         exp = data.expenses.filter(e => new Date(e.date).getFullYear() === y).reduce((s, e) => s + e.amount, 0);
     }
-    
+
     let canc;
     if (statsPeriod === 'day') {
-        canc = data.records.filter(r => r.status === 'cancelled' && r.date === n.toISOString().slice(0, 10)).length;
+        let dateStr = n.getFullYear() + '-' + (''+(n.getMonth()+1)).padStart(2,'0') + '-' + (''+n.getDate()).padStart(2,'0');
+        canc = data.records.filter(r => r.status === 'cancelled' && r.date === dateStr).length;
     } else if (statsPeriod === 'month') {
         canc = data.records.filter(r => r.status === 'cancelled' && r.date && new Date(r.date).getMonth() === m && new Date(r.date).getFullYear() === y).length;
     } else {
         canc = data.records.filter(r => r.status === 'cancelled' && r.date && new Date(r.date).getFullYear() === y).length;
     }
-    
+
     let avg = periodRecords.length ? Math.round(rev / periodRecords.length) : 0;
-    
+
     document.getElementById('statsPeriodLabel').innerText = periodLabel;
     document.getElementById('statsRevenue').innerText = rev + '₽';
     document.getElementById('statsCost').innerText = exp + '₽';
@@ -68,29 +70,42 @@ export function renderStats() {
     document.getElementById('statsAvg').innerText = avg + '₽';
     document.getElementById('statsCompleted').innerText = periodRecords.length;
     document.getElementById('statsCancelled').innerText = canc;
-    
-    // Топ услуг
-    let ss = {};
+
+    // Топ услуг — все услуги за период, отсортированные по сумме
+    let serviceStats = {};
     periodRecords.forEach(r => {
-        if (r.service) {
-            let name = r.service.split(' + ')[0];
-            if (!ss[name]) ss[name] = { count: 0, sum: 0 };
-            ss[name].count++;
-            ss[name].sum += r.price || 0;
-        }
+        let services = (r.service || '—').split(' + ');
+        services.forEach(svc => {
+            svc = svc.trim();
+            if (svc && svc !== '—') {
+                if (!serviceStats[svc]) {
+                    serviceStats[svc] = { count: 0, sum: 0 };
+                }
+                serviceStats[svc].count++;
+                serviceStats[svc].sum += r.price || 0;
+            }
+        });
     });
-    let topServices = Object.entries(ss).sort((a, b) => b[1].sum - a[1].sum).slice(0, 5);
-    
-    let h = '';
-    if (!topServices.length) {
-        h = '<div style="text-align:center;color:#999;padding:12px">Нет данных</div>';
+
+    let sortedServices = Object.entries(serviceStats).sort((a, b) => b[1].sum - a[1].sum);
+
+    let sh = '';
+    if (sortedServices.length === 0) {
+        sh = '<div class="empty-state">Нет услуг за период</div>';
     } else {
-        topServices.forEach(([name, s]) => {
-            let color = getServiceColor(name);
-            h += `<div class="card-row">
-                <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${color};margin-right:6px"></span>${name}</span>
-                <span>${s.count} раз — ${s.sum}₽</span></div>`;
+        sortedServices.forEach(([name, data], index) => {
+            sh += `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;gap:8px;">
+                    <span style="color:var(--sub);font-size:.85rem;font-weight:600;">${index + 1}.</span>
+                    <span style="flex:1;font-weight:600;font-size:1rem;">${name}</span>
+                    <span style="font-size:.8rem;color:var(--sub);white-space:nowrap;">${data.count} раз(а)</span>
+                    <span style="font-weight:800;font-size:1.1rem;color:var(--accent);white-space:nowrap;">${data.sum}₽</span>
+                </div>`;
         });
     }
-    document.getElementById('statsTopServices').innerHTML = h;
+
+    let statsTopServices = document.getElementById('statsTopServices');
+    if (statsTopServices) {
+        statsTopServices.innerHTML = sh;
+    }
 }

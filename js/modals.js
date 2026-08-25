@@ -553,21 +553,37 @@ export function showClientStats(id) {
     let t = done + canc;
     let p = t ? Math.round(done / t * 100) : 0;
     let sum = all.filter(r => r.status === 'completed').reduce((s, r) => s + (r.price || 0), 0);
-
-    document.getElementById('clientStatsContent').innerHTML = `
-        <div class="card">
-            <div class="card-row"><span>👤</span><span>${c.name}</span></div>
-            <div class="card-row"><span>📞</span><span>${c.phone||'—'}</span></div>
-            <div class="card-row"><span>💬</span><span>${c.comment||'—'}</span></div>
-            <div class="card-row"><span>✅</span><span>${done}</span></div>
-            <div class="card-row"><span>❌</span><span>${canc}</span></div>
-            <div class="card-row"><span>📊</span><span>${t}</span></div>
-            <div class="card-row"><span>⭐</span><span>${p}%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:${p}%"></div></div>
-            <div class="card-row"><span>💰</span><span>${sum}₽</span></div>
-        </div>`;
+    let lastVisit = all.filter(r => r.status === 'completed').sort((a, b) => new Date(b.date) - new Date(a.date))[0]?.date || '—';
 
     document.getElementById('clientStatsTitle').innerText = c.name;
+    document.getElementById('clientStatsPhone').innerText = c.phone || '';
+
+    document.getElementById('clientStatsContent').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div style="background:var(--bg);padding:12px;border-radius:10px;text-align:center;">
+                <div style="font-size:1.3rem;font-weight:800;color:var(--green);">${done}</div>
+                <div style="font-size:.65rem;color:var(--sub);">Выполнено</div>
+            </div>
+            <div style="background:var(--bg);padding:12px;border-radius:10px;text-align:center;">
+                <div style="font-size:1.3rem;font-weight:800;color:var(--red);">${canc}</div>
+                <div style="font-size:.65rem;color:var(--sub);">Отменено</div>
+            </div>
+            <div style="background:var(--bg);padding:12px;border-radius:10px;text-align:center;">
+                <div style="font-size:1.3rem;font-weight:800;color:var(--accent);">${p}%</div>
+                <div style="font-size:.65rem;color:var(--sub);">Рейтинг</div>
+            </div>
+            <div style="background:var(--bg);padding:12px;border-radius:10px;text-align:center;">
+                <div style="font-size:1.3rem;font-weight:800;color:var(--text);">${sum}₽</div>
+                <div style="font-size:.65rem;color:var(--sub);">Общая сумма</div>
+            </div>
+        </div>
+        <div class="progress-bar" style="margin-bottom:12px;">
+            <div class="progress-fill" style="width:${p}%;"></div>
+        </div>
+        <div style="font-size:.75rem;color:var(--sub);text-align:center;margin-bottom:12px;">
+            Последний визит: ${lastVisit}
+        </div>`;
+
     show('clientStatsModal');
 }
 

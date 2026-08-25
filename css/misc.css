@@ -33,15 +33,6 @@ body.dark .day-total { border-top-color: var(--border); }
     font-size: 1.2rem;
 }
 
-/* Переключатель вида записей */
-#recordsViewTabs .small-btn.active {
-    background: var(--accent);
-    color: #fff;
-}
-body.dark #recordsViewTabs .small-btn.active {
-    background: var(--accent);
-}
-
 /* Нижняя панель с действиями */
 .bottom-actions {
     position: fixed;
@@ -62,4 +53,25 @@ body.dark #recordsViewTabs .small-btn.active {
 body.dark .bottom-actions {
     background: var(--bg);
     border-top-color: var(--border);
+}
+
+/* Бейджи оплаты */
+.pay-badge {
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-size: .8rem;
+    font-weight: 700;
+    display: inline-block;
+}
+.pay-badge.green {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+}
+.pay-badge.yellow {
+    background: rgba(245, 165, 36, 0.12);
+    color: #f5a623;
+}
+.pay-badge.red {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
 }
