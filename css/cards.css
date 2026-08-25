@@ -111,3 +111,5 @@
     display: block;
     margin-bottom: 12px;
 }
+
+.badge-orange { background: rgba(245, 165, 36, 0.15); color: #d6941a; }

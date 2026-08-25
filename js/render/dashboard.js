@@ -41,6 +41,8 @@ export function renderDashboard() {
                 dateBadge = '<span class="status-badge badge-green">Сегодня</span>';
             } else if (r.date === tomorrowStr) {
                 dateBadge = '<span class="status-badge badge-blue">Завтра</span>';
+            } else if (r.date < today) {
+                dateBadge = '<span class="status-badge badge-orange">В работе</span>';
             } else {
                 dateBadge = `<span style="font-size:.75rem;color:var(--sub);">${r.date}</span>`;
             }
