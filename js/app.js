@@ -1,19 +1,19 @@
 // ===== ТОЧКА ВХОДА =====
 
-import { setPage, setOnPageChange } from './router.js?v=11';
-import { renderHistory, setHistoryPeriod, shiftHistoryPeriod } from './render/history.js?v=11';
-import { renderServices } from './render/services.js?v=11';
-import { renderDashboard, shiftDashboardDate, setDashboardDate } from './render/dashboard.js?v=11';
-import { setStatsPeriod, shiftStatsPeriod } from './render/stats.js?v=11';
+import { setPage, setOnPageChange } from './router.js?v=12';
+import { renderHistory, shiftHistoryPeriod } from './render/history.js?v=12';
+import { renderServices } from './render/services.js?v=12';
+import { renderDashboard, shiftDashboardDate } from './render/dashboard.js?v=12';
+import { setStatsPeriod, shiftStatsPeriod } from './render/stats.js?v=12';
 import {
     openClientModal, openRecordModal, openExpenseModal, editExpense,
     openServiceModal, editService, showClientStats,
     editRecord, completeRecord, cancelRecord,
     deleteRecord, deleteExpense, deleteService,
-    openInactiveModal, exportData, importData, resetData
-} from './modals.js?v=11';
-import { callPhone } from './utils.js?v=11';
-import { initTheme, toggleTheme, randomTheme } from './theme.js?v=11';
+    exportData, importData, resetData
+} from './modals.js?v=12';
+import { callPhone, toast, checkBackupReminder, setBackupDate } from './utils.js?v=12';
+import { initTheme, toggleTheme, randomTheme } from './theme.js?v=12';
 
 // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
 window.callPhone = callPhone;
@@ -60,25 +60,6 @@ btn = document.getElementById('datePrevBtn');
 if (btn) btn.onclick = function() { shiftDashboardDate(-1); };
 btn = document.getElementById('dateNextBtn');
 if (btn) btn.onclick = function() { shiftDashboardDate(1); };
-
-// ===== ПОДЕЛИТЬСЯ =====
-btn = document.getElementById('shareMenuBtn');
-if (btn) btn.onclick = async function() {
-    let link = 'https://pomah4uk.github.io/Beauty-Crm/booking.html';
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: 'Красивые губы',
-                text: 'Ждут тебя здесь!!!',
-                url: link
-            });
-        } catch(e) {}
-    } else {
-        navigator.clipboard.writeText(link)
-            .then(() => toast('📋 Ссылка скопирована'))
-            .catch(() => {});
-    }
-};
 
 // ===== ТЕМА В МЕНЮ =====
 btn = document.getElementById('themeMenuBtn');
@@ -138,23 +119,52 @@ document.querySelectorAll('.modal').forEach(modal => {
     });
 });
 
-// ===== КНОПКА НАЗАД =====
+// ===== КНОПКА НАЗАД И БЭКАП-НАПОМИНАНИЕ =====
 function updateNavBack(page) {
     let navBtn = document.getElementById('navBackBtn');
     if (navBtn) {
         navBtn.style.display = (page === 'dashboard') ? 'none' : 'block';
     }
+
+    let backupBtn = document.getElementById('backupReminderBtn');
+    if (backupBtn) {
+        if (page === 'dashboard' && checkBackupReminder()) {
+            backupBtn.style.display = 'block';
+        } else {
+            backupBtn.style.display = 'none';
+        }
+    }
 }
 setOnPageChange(updateNavBack);
 
-// ===== TOAST =====
-window.toast = function(msg) {
-    let t = document.createElement('div');
-    t.className = 'toast';
-    t.innerText = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2000);
+// ===== БЫСТРЫЙ БЭКАП =====
+window.quickBackup = function() {
+    let rawData = localStorage.getItem('data');
+    if (!rawData) {
+        toast('Нет данных для бэкапа');
+        return;
+    }
+
+    let blob = new Blob([rawData], { type: 'application/json' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = 'crm_backup.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+    setBackupDate();
+
+    let backupBtn = document.getElementById('backupReminderBtn');
+    if (backupBtn) backupBtn.style.display = 'none';
+
+    toast('💾 Бэкап сохранён');
 };
+
+// ===== TOAST =====
+window.toast = toast;
 
 // ===== КНОПКА ВВЕРХ =====
 window.addEventListener('scroll', function() {

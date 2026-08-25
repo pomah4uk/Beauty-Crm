@@ -65,9 +65,6 @@ export function renderHistory() {
                     <div style="font-size:1rem;margin-bottom:6px;">${r.service||'—'}</div>
                     ${r.comment ? `<div style="font-size:.85rem;color:var(--sub);margin-bottom:6px;">💬 ${r.comment}</div>` : ''}
                     <div style="font-weight:800;font-size:1.1rem;">${r.price ? r.price + '₽' : '—'}</div>
-                    <div class="card-actions">
-                        <button class="small-btn" onclick="event.stopPropagation();window.deleteRecord(${r.id})">🗑️</button>
-                    </div>
                 </div>`;
         });
     }
