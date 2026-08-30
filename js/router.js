@@ -19,6 +19,7 @@ const titles = {
     history: 'История',
     stats: 'Статистика',
     services: 'Услуги',
+    expenses: 'Расходы',
     backup: 'Бэкап'
 };
 
@@ -39,6 +40,7 @@ function renderCurrentPage() {
         case 'history':   renderHistory(); break;
         case 'stats':     renderStats(); break;
         case 'services':  renderServices(); break;
+        case 'expenses':  renderExpenses(); break;
         case 'menu':      break;
     }
 }
@@ -46,7 +48,7 @@ function renderCurrentPage() {
 export function setPage(p) {
     currentPage = p;
 
-    ['Dashboard', 'Menu', 'Clients', 'Records', 'History', 'Stats', 'Services', 'Backup'].forEach(name => {
+    ['Dashboard', 'Menu', 'Clients', 'Records', 'History', 'Stats', 'Services', 'Expenses', 'Backup'].forEach(name => {
         let el = document.getElementById('page' + name);
         if (el) el.style.display = (p === name.toLowerCase()) ? 'block' : 'none';
     });

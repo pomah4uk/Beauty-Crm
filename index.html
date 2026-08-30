@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="CRM Мастер">
     <meta name="theme-color" content="#f8fafc">
-    <link rel="stylesheet" href="css/style.css?v=11">
+    <link rel="stylesheet" href="css/style.css?v=12">
     <title>CRM Мастер</title>
 </head>
 <body>
@@ -47,9 +47,11 @@
     </div>
     <div style="display:flex;flex-direction:column;">
         <button class="btn btn-primary" data-page="clients"><span class="menu-icon">👥</span> Клиенты</button>
+        <button class="btn btn-primary" data-page="records"><span class="menu-icon">📋</span> Активные</button>
         <button class="btn btn-primary" data-page="history"><span class="menu-icon">📜</span> История</button>
         <button class="btn btn-primary" data-page="stats"><span class="menu-icon">📊</span> Статистика</button>
         <button class="btn btn-primary" data-page="services"><span class="menu-icon">⭐</span> Услуги</button>
+        <button class="btn btn-primary" data-page="expenses"><span class="menu-icon">💸</span> Расходы</button>
         <button class="btn btn-primary" data-page="backup"><span class="menu-icon">💾</span> Бэкап</button>
         <button class="btn btn-primary" id="themeMenuBtn"><span class="menu-icon">🌙</span> Тема</button>
         <button class="btn btn-primary" id="randomThemeMenuBtn"><span class="menu-icon">🎲</span> Случайная тема</button>
@@ -117,6 +119,15 @@
 <div id="pageServices" class="hidden">
     <button id="addServiceBtn" class="btn btn-primary">+ Добавить услугу</button>
     <div id="servicesList"></div>
+</div>
+
+<!-- РАСХОДЫ -->
+<div id="pageExpenses" class="hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h2 style="margin:0;">💸 Расходы</h2>
+        <button class="btn btn-primary" style="width:auto;margin:0;padding:10px 16px;" onclick="window.openExpenseModal()">➕ Добавить</button>
+    </div>
+    <div id="expensesList"></div>
 </div>
 
 <!-- БЭКАП -->
@@ -275,6 +286,6 @@
     <button id="addExpenseBtn" class="btn btn-orange" style="flex:1;margin:0">💸 Расход</button>
 </div>
 
-<script type="module" src="js/app.js?v=11"></script>
+<script type="module" src="js/app.js?v=12"></script>
 </body>
 </html>
